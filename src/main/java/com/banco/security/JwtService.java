@@ -1,5 +1,6 @@
 package com.banco.security;
 
+import ch.qos.logback.core.util.TimeUtil;
 import com.banco.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -17,6 +18,7 @@ import java.security.PrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 @Data
@@ -53,7 +55,7 @@ public class JwtService {
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder().subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * Integer.parseInt(JWT_REFRESH_EXPIRATION)))
+                .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Long.getLong(JWT_EXPIRATION))))
                 .claims(new HashMap<>()).signWith(getSignInKey()).compact();
     }
 
@@ -63,7 +65,7 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims, User userDetails) {
         return Jwts.builder().claims(extraClaims).subject(userDetails.getEmail()).issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * Integer.parseInt(JWT_REFRESH_EXPIRATION))).signWith(getSignInKey())
+                .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Long.getLong(JWT_EXPIRATION)))).signWith(getSignInKey())
                 .compact();
     }
 
