@@ -30,6 +30,13 @@ public class SecurityConfiguration {
     @Value("${endpoints.noauth}")
     private final List<String> NO_AUTH_ENDPOINTS;
 
+    @Value("${endpoints.cashier}")
+    private final List<String> CASHIER_ENPOINTS;
+
+    @Value("${endpoints.employee}")
+    private final List<String> EMPLOYEE_ENDPOINTS;
+    @Value("${endpoints.tpv}")
+    private final List<String> TPV_ENDPOINTS;
     @Value("${endpoints.admin}")
     private final List<String> ADMIN_ENDPOINTS;
 
@@ -40,7 +47,10 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests.requestMatchers(Strings.toStringArray(NO_AUTH_ENDPOINTS)).permitAll();
-                    authorizeHttpRequests.requestMatchers("/admin/**").hasRole("ADMIN");
+                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(CASHIER_ENPOINTS)).hasRole("CASHIER");
+                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(EMPLOYEE_ENDPOINTS)).hasRole("EMPLOYEE");
+                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(TPV_ENDPOINTS)).hasRole("TPV");
+                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(ADMIN_ENDPOINTS)).hasRole("ADMIN");
                     authorizeHttpRequests.anyRequest().hasAnyRole("USER", "ADMIN");
 
                 }).sessionManagement(

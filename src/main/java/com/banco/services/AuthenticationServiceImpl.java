@@ -38,9 +38,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto) throws CustomException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getEmail(), authenticationRequestDto.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
-            Optional<User> user = userRepository.findByEmail(authenticationRequestDto.getEmail());
+            Optional<User> user = userRepository.findByUsername(authenticationRequestDto.getUsername());
             if (user.isEmpty())
                 throw new CustomException("USERS-004", "User not found", 404);
             User finalUser = user.get();
@@ -58,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new CustomException("USERS-005", "User is locked, try again in: 10 minutes", 401);
             }
         } catch (LockedException e) {
-            User user = userRepository.findByEmail(authenticationRequestDto.getEmail()).orElseThrow();
+            User user = userRepository.findByUsername(authenticationRequestDto.getUsername()).orElseThrow();
             if (user.getLastAttempt().before(new Timestamp(System.currentTimeMillis()))) {
                 user.setLocked(false);
                 user.setLastAttempt(null);
@@ -75,7 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (DisabledException e) {
             throw new CustomException("USERS-007", "Confirm your email to continue, you can resend email link.", 401);
         }
-        User user = userRepository.findByEmail(authenticationRequestDto.getEmail()).orElseThrow();
+        User user = userRepository.findByUsername(authenticationRequestDto.getUsername()).orElseThrow();
         user.setAttempts((short) 0);
         userRepository.save(user);
         return AuthenticationResponseDto.builder().token(jwtService.generateToken(user)).refresh_token(jwtService.generateRefreshToken(user)).build();

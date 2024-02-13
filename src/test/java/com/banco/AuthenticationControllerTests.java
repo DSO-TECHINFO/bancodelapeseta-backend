@@ -1,13 +1,13 @@
-package com.banco.bancodelapeseta;
+package com.banco;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BancodelapesetaApplicationTests {
-
+public class AuthenticationControllerTests {
     @Test
-    void contextLoads() {
+    public void test(){
+        return;
     }
 
 }
