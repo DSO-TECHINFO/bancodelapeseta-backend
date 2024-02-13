@@ -1,0 +1,86 @@
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+services:
+  backend:
+    env_file: .env
+    image: ${PROJECT_NAME}-back_img
+    container_name: ${PROJECT_NAME}-back_cnt
+    hostname: ${PROJECT_NAME}-back
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+      args:
+        CONTAINER_UID: ${CONTAINER_UID}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  mariadb:
+    env_file: .env
+    image: mariadb:10.3
+    container_name: ${PROJECT_NAME}-mariadb_cnt
+    hostname: ${PROJECT_NAME}-mariadb
+    restart: "${RESTART_POLICY:-no}"
+    ports:
+        - "${MARIADB_PORT:-3306}:3306"
+    secrets:
+       - db-psswd
+       - r-db-psswd
+    volumes:
+      - ./docker/mariadb/data:/var/lib/mysql
+    command: --innodb_use_native_aio=0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3
+
+secrets:
+  db-psswd:
+    file: ./docker/mariadb/secrets/password.txt
+  r-db-psswd:
+    file: ./docker/mariadb/secrets/root-password.txt
+
+# The commented out section below is an example of how to define a PostgreSQL
+# database that your application can use. `depends_on` tells Docker Compose to
+# start the database before your application. The `db-data` volume persists the
+# database data between container restarts. The `db-password` secret is used
+# to set the database password. You must create `db/password.txt` and add
+# a password of your choosing to it before running `docker-compose up`.
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#   db:
+#     image: postgres
+#     restart: always
+#     user: postgres
+#     secrets:
+#       - db-password
+#     volumes:
+#       - db-data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=example
+#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-psswd
+#     expose:
+#       - 5432
+#     healthcheck:
+#       test: [ "CMD", "pg_isready" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+# volumes:
+#   db-data:
+# secrets:
+#   db-psswd:
+#     file: db/password.txt

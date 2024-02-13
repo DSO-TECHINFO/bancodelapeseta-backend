@@ -32,3 +32,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Project Domain
+docker/**/secrets/*
+!docker/**/secrets/*.sample*
+
+docker/**/data/*
+
+.env
