@@ -94,6 +94,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .role(roleRepository.findAll().stream().filter(role -> role.getRoleName().equals("ROLE_USER")).findFirst().orElseThrow())
                 .locked(false)
                 .phoneNumber(registerRequestDto.getPhone())
+                .attempts((short)0)
                 .emailConfirmed(false)
                 .creationDate(new Date(System.currentTimeMillis()))
                 .build();

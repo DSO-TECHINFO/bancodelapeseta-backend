@@ -22,6 +22,7 @@ import java.util.*;
 @NoArgsConstructor
 public class User implements UserDetails {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column
@@ -30,40 +31,55 @@ public class User implements UserDetails {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ManyToOne
     private UserRole role;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String email;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String phoneNumber;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String username;
+    @JsonIgnore
     @Column
     private String password;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private Boolean locked;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private Boolean emailConfirmed;
+    @JsonIgnore
     @Column
     private String emailConfirmationCode;
+    @JsonIgnore
     @Column
     private Timestamp emailConfirmationCodeExpiration;
+    @JsonIgnore
     @Column
     private Byte reliability;
-    @Column
-    private Long roleId;
+    @JsonIgnore
     @Column
     private String sign;
+    //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     //@Column
     //private Long physicalPersonInfoId; //TODO
+    @JsonIgnore
     @Column
     private String emailChangeCode;
+    @JsonIgnore
     @Column
     private String passwordChangeCode;
+    @JsonIgnore
     @Column
     private String transactionApproveCode;
+    @JsonIgnore
     @Column
     private Short attempts;
+    @JsonIgnore
     @Column
     private Date lastAttempt;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private Date creationDate;
 
@@ -115,7 +131,6 @@ public class User implements UserDetails {
         if (!Objects.equals(emailConfirmationCodeExpiration, user.emailConfirmationCodeExpiration))
             return false;
         if (!Objects.equals(reliability, user.reliability)) return false;
-        if (!Objects.equals(roleId, user.roleId)) return false;
         if (!Objects.equals(sign, user.sign)) return false;
         //if (!Objects.equals(physicalPersonInfoId, user.physicalPersonInfoId))
           //  return false;
@@ -138,7 +153,6 @@ public class User implements UserDetails {
         result = 31 * result + (emailConfirmationCode != null ? emailConfirmationCode.hashCode() : 0);
         result = 31 * result + (emailConfirmationCodeExpiration != null ? emailConfirmationCodeExpiration.hashCode() : 0);
         result = 31 * result + (reliability != null ? reliability.hashCode() : 0);
-        result = 31 * result + (roleId != null ? roleId.hashCode() : 0);
         result = 31 * result + (sign != null ? sign.hashCode() : 0);
        // result = 31 * result + (physicalPersonInfoId != null ? physicalPersonInfoId.hashCode() : 0);
         result = 31 * result + (emailChangeCode != null ? emailChangeCode.hashCode() : 0);

@@ -1,5 +1,6 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,10 +13,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRole {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     private Integer id;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Basic
     @Column(name = "role_name")
     private String roleName;
