@@ -6,13 +6,13 @@ import lombok.*;
 
 import java.util.Objects;
 
-@Entity
+@jakarta.persistence.Entity
 @Table(name = "user_role", schema = "bancodelapeseta")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRole {
+public class EntityRole {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -28,10 +28,10 @@ public class UserRole {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserRole userRole = (UserRole) o;
+        EntityRole entityRole = (EntityRole) o;
 
-        if (!Objects.equals(id, userRole.id)) return false;
-        if (!Objects.equals(roleName, userRole.roleName)) return false;
+        if (!Objects.equals(id, entityRole.id)) return false;
+        if (!Objects.equals(roleName, entityRole.roleName)) return false;
 
         return true;
     }

@@ -1,7 +1,6 @@
 package com.banco.security;
 
-import ch.qos.logback.core.util.TimeUtil;
-import com.banco.entities.User;
+import com.banco.entities.Entity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -13,8 +12,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
-import java.security.PrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,19 +56,19 @@ public class JwtService {
                 .claims(new HashMap<>()).signWith(getSignInKey()).compact();
     }
 
-    public String generateToken(User userDetails) {
-        return generateToken(new HashMap<String, Object>(), userDetails);
+    public String generateToken(Entity entityDetails) {
+        return generateToken(new HashMap<String, Object>(), entityDetails);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, User userDetails) {
-        return Jwts.builder().claims(extraClaims).subject(userDetails.getEmail()).issuedAt(new Date(System.currentTimeMillis()))
+    public String generateToken(Map<String, Object> extraClaims, Entity entityDetails) {
+        return Jwts.builder().claims(extraClaims).subject(entityDetails.getEmail()).issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Long.getLong(JWT_EXPIRATION)))).signWith(getSignInKey())
                 .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        User user = (User) userDetails;
-        return user.getEmail().equals(extractEmail(token)) && !isTokenExpired(token);
+        Entity entity = (Entity) userDetails;
+        return entity.getEmail().equals(extractEmail(token)) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
