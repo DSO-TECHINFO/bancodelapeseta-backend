@@ -229,7 +229,6 @@ public class Entity implements UserDetails {
         if (!Objects.equals(taxId, entity.taxId)) return false;
         if (!Objects.equals(sign, entity.sign)) return false;
         if (!Objects.equals(signActivated, entity.signActivated)) return false;
-        if (!Objects.equals(debtType, entity.debtType)) return false;
         if (!Objects.equals(emailChangeCode, entity.emailChangeCode))
             return false;
         if (!Objects.equals(passwordChangeCode, entity.passwordChangeCode))
