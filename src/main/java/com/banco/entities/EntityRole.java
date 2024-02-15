@@ -1,5 +1,6 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,21 +8,23 @@ import lombok.*;
 import java.util.Objects;
 
 @jakarta.persistence.Entity
-@Table(name = "user_role", schema = "bancodelapeseta")
+@Table(name = "roles", schema = "bancodelapeseta")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class EntityRole {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "id")
+    @Column
     private Integer id;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Basic
-    @Column(name = "role_name")
+    @JsonIgnore
+    @Column
     private String roleName;
+    @JsonIgnore
+    @Column
+    private String roleDescription;
 
     @Override
     public boolean equals(Object o) {

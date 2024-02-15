@@ -76,7 +76,7 @@ public class Entity implements UserDetails {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private String gender;
+    private EntityGender gender;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
@@ -88,7 +88,7 @@ public class Entity implements UserDetails {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private Byte type;
+    private EntityType type;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
@@ -159,17 +159,18 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private Object debtType; //TODO implement class EntityDebtType
+    private EntityDebtType debtType; //TODO implement class EntityDebtType
 
-    @ManyToOne
-    private EntityRole role;
+    @Column
+    private Date settingUpDate;
+
+    @Column
+    private String createdIpAddress;
 
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> ga = new ArrayList<>();
-        ga.add(new SimpleGrantedAuthority(this.role.getRoleName()));
-        return ga;
+        return new ArrayList<>();
     }
 
     @Override

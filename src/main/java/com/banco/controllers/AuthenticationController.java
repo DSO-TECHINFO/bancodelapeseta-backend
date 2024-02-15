@@ -1,12 +1,14 @@
 package com.banco.controllers;
 
 import com.banco.dtos.AuthenticationRequestDto;
-import com.banco.dtos.RegisterRequestDto;
+import com.banco.dtos.RegisterCompanyDto;
+import com.banco.dtos.RegisterPhysicalDto;
 import com.banco.exceptions.CustomException;
 import com.banco.services.AuthenticationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,10 +29,15 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.login(authenticationRequestDto));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequestDto registerRequestDto, HttpServletRequest request) throws CustomException {
-        authenticationService.register(registerRequestDto, request);
-        return ResponseEntity.ok().build();
+    @PostMapping("/register/physical")
+    public ResponseEntity<?> register(@RequestBody RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException {
+        authenticationService.registerPhysical(registerPhysicalDto, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    @PostMapping("/register/physical")
+    public ResponseEntity<?> register(@RequestBody RegisterCompanyDto registerCompanyDto, HttpServletRequest request) throws CustomException {
+        authenticationService.registerCompany(registerCompanyDto, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }

@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 @Service
-public class MyBeansUtil<T> {
-    public void copyNonNullProperties(T in, T target) {
+public class MyBeansUtil<T, I> {
+    public void copyNonNullProperties(T in, I target) {
         if (in == null || target == null || target.getClass() != in.getClass()) return;
 
         final BeanWrapper src = new BeanWrapperImpl(in);

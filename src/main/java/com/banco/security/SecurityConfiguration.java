@@ -47,11 +47,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests.requestMatchers(Strings.toStringArray(NO_AUTH_ENDPOINTS)).permitAll();
-                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(CASHIER_ENPOINTS)).hasRole("CASHIER");
-                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(EMPLOYEE_ENDPOINTS)).hasRole("EMPLOYEE");
-                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(TPV_ENDPOINTS)).hasRole("TPV");
-                    authorizeHttpRequests.requestMatchers(Strings.toStringArray(ADMIN_ENDPOINTS)).hasRole("ADMIN");
-                    authorizeHttpRequests.anyRequest().hasAnyRole("USER", "ADMIN");
+                    authorizeHttpRequests.anyRequest().authenticated();
 
                 }).sessionManagement(
                         (sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,7 +1,7 @@
 package com.banco.configurations;
 
 
-import com.banco.repositories.UserRepository;
+import com.banco.repositories.EntityRepository;
 import lombok.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,15 +21,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class ApplicationConfiguration {
 
-    private final UserRepository userRepository;
+    private final EntityRepository entityRepository;
 
-    public ApplicationConfiguration(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ApplicationConfiguration(EntityRepository entityRepository) {
+        this.entityRepository = entityRepository;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsername(username)
+        return username -> entityRepository.findByTaxId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
     }
 
