@@ -34,7 +34,7 @@ public class AuthenticationController {
         authenticationService.registerPhysical(registerPhysicalDto, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    @PostMapping("/register/physical")
+    @PostMapping("/register/company")
     public ResponseEntity<?> register(@RequestBody RegisterCompanyDto registerCompanyDto, HttpServletRequest request) throws CustomException {
         authenticationService.registerCompany(registerCompanyDto, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();

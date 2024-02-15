@@ -12,7 +12,7 @@ import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
 import com.banco.repositories.RoleRepository;
 import com.banco.security.JwtService;
-import com.banco.utils.MyBeansUtil;
+import com.banco.utils.NonNullFields;
 import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -37,8 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordUtils passwordUtils;
-    private final MyBeansUtil<RegisterPhysicalDto, Entity> entityRegisterPhysicalDtoMyBeansUtil;
-    private final MyBeansUtil<RegisterCompanyDto, Entity> entityRegisterCompanyDtoMyBeansUtil;
+    private final NonNullFields nonNullFields;
     @Override
     public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto) throws CustomException {
         try {
@@ -88,7 +88,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException {
-        Entity entity = Entity.builder().build();
+        Entity entity = Entity.builder()
+                .creationDate(new Date(System.currentTimeMillis()))
+                .emailConfirmed(false)
+                .locked(false)
+                .signActivated(false)
+                .type(EntityType.PHYSICAL)
+                .loginAttempts((short)0)
+                .employee(false)
+                .build();
 
         if(passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())){
             throw new CustomException("USERS-003", "Password does not fit password requirements", 400);
@@ -99,15 +107,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 && registerPhysicalDto.getDebtType() != EntityDebtType.PENSIONER ){
             throw new CustomException("USERS-004", "Physical person cannot have company debt type", 400);
         }
-        entityRegisterPhysicalDtoMyBeansUtil.copyNonNullProperties(registerPhysicalDto, entity);
+        if(registerPhysicalDto.getNationalIdExpiration().before(new Date()))
+            throw new CustomException("USERS-005", "You national document has expirated.", 400);
+
+        nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getRemoteAddr());
         entity.setType(EntityType.PHYSICAL);
+        entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
         entityRepository.save(entity);
     }
     @Transactional
     @Override
     public void registerCompany(RegisterCompanyDto registerCompanyDto, HttpServletRequest request) throws CustomException {
-        Entity entity = Entity.builder().build();
+        Entity entity = Entity.builder()
+                .creationDate(new Date(System.currentTimeMillis()))
+                .emailConfirmed(false)
+                .locked(false)
+                .signActivated(false)
+                .type(EntityType.COMPANY)
+                .loginAttempts((short)0)
+                .employee(false)
+                .build();
 
         if(passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())){
             throw new CustomException("USERS-003", "Password does not fit password requirements", 400);
@@ -118,9 +138,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 && registerCompanyDto.getDebtType() != EntityDebtType.COMPANY ){
             throw new CustomException("USERS-004", "Company canoot have physical person debt type", 400);
         }
-        entityRegisterCompanyDtoMyBeansUtil.copyNonNullProperties(registerCompanyDto, entity);
+
+
+        nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
         entity.setCreatedIpAddress(request.getRemoteAddr());
         entity.setType(EntityType.COMPANY);
+        entity.setPassword(passwordEncoder.encode(registerCompanyDto.getPassword()));
         entityRepository.save(entity);
     }
 

@@ -2,18 +2,11 @@ package com.banco.dtos;
 
 import com.banco.entities.EntityDebtType;
 import com.banco.entities.EntityGender;
-import com.banco.entities.EntityRole;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -26,7 +19,7 @@ public class RegisterPhysicalDto {
 
     private String surname;
 
-    private LocalDate birthday;
+    private Date birthday;
 
     private String taxId;
 

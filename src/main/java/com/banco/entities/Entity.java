@@ -40,7 +40,7 @@ public class Entity implements UserDetails {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private LocalDate birthday;
+    private Date birthday;
 
     @JsonIgnore
     @Column
@@ -48,7 +48,7 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private LocalDate nationalIdExpiration;
+    private Date nationalIdExpiration;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
@@ -106,7 +106,7 @@ public class Entity implements UserDetails {
     @Column
     private String phoneNumber;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private Boolean locked;
 
@@ -161,9 +161,11 @@ public class Entity implements UserDetails {
     @Column
     private EntityDebtType debtType; //TODO implement class EntityDebtType
 
+    @JsonIgnore
     @Column
     private Date settingUpDate;
 
+    @JsonIgnore
     @Column
     private String createdIpAddress;
 

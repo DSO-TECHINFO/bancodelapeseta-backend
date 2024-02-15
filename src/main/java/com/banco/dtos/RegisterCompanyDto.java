@@ -3,11 +3,13 @@ package com.banco.dtos;
 import com.banco.entities.EntityDebtType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -18,7 +20,6 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterCompanyDto {
-
 
     private String name;
 
