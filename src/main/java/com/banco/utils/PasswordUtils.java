@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 @Service
 public class PasswordUtils {
     private static final String PASSWORD_PATTERN =
-            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$";
+            "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?%/*~$^+=<>]).{8,20}$";
 
     public boolean checkPasswordValid(String password) {
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN);

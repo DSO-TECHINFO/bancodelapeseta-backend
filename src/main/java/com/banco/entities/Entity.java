@@ -123,7 +123,18 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private Timestamp emailConfirmationCodeExpiration;
+    private Date emailConfirmationCodeExpiration;
+
+    @JsonIgnore
+    @Column
+    private Boolean phoneConfirmed;
+
+    @JsonIgnore
+    @Column
+    private String phoneConfirmationCode;
+
+    @JsonIgnore
+    private Date phoneConfirmationCodeExpiration;
 
     @JsonIgnore
     @Column
@@ -182,22 +193,22 @@ public class Entity implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return !locked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return emailConfirmed && phoneConfirmed;
     }
 
     @Override

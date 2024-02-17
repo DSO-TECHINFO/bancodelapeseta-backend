@@ -17,6 +17,7 @@ import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 @AllArgsConstructor
 @Service
@@ -46,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (BadCredentialsException e) {
             Optional<Entity> user = entityRepository.findByTaxId(authenticationRequestDto.getUsername());
             if (user.isEmpty())
-                throw new CustomException("USERS-004", "User not found", 404);
+                throw new CustomException("USERS-001", "Wrong username or password", 404);
             Entity finalEntity = user.get();
             if (finalEntity.getLoginAttempts() == null)
                 finalEntity.setLoginAttempts((short) 0);
@@ -54,12 +57,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (attempts < 3) {
                 finalEntity.setLoginAttempts(++attempts);
                 entityRepository.save(finalEntity);
-                throw new CustomException("USERS-0006", "Wrong password, attempts left: " + (4 - attempts), 401);
+                throw new CustomException("USERS-001", "Wrong username or password", 401);
             } else {
                 finalEntity.setLocked(true);
                 finalEntity.setLastAttempt(new Timestamp(System.currentTimeMillis() + 1000 * 60 * 10));
                 entityRepository.save(finalEntity);
-                throw new CustomException("USERS-005", "User is locked, try again in: 10 minutes", 401);
+                throw new CustomException("USERS-002", "User is locked, try again in: 10 minutes", 401);
             }
         } catch (LockedException e) {
             Entity entity = entityRepository.findByTaxId(authenticationRequestDto.getUsername()).orElseThrow();
@@ -74,15 +77,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .getSeconds();
                 long minutes = Math.floorDiv(diffInSecs, 60L);
                 long secs = diffInSecs % 60;
-                throw new CustomException("USERS-006", "User is locked, try again in: " + minutes + " minutes and " + secs + " seconds", 401);
+                throw new CustomException("USERS-004", "User is locked, try again in: " + minutes + " minutes and " + secs + " seconds", 401);
             }
         } catch (DisabledException e) {
-            throw new CustomException("USERS-007", "Confirm your email to continue, you can resend email link.", 401);
+            throw new CustomException("USERS-005", "Confirm your email and phone to continue, you can resend email and phone code.", 401);
         }
         Entity entity = entityRepository.findByTaxId(authenticationRequestDto.getUsername()).orElseThrow();
         entity.setLoginAttempts((short) 0);
         entityRepository.save(entity);
-        return AuthenticationResponseDto.builder().token(jwtService.generateToken(entity)).refresh_token(jwtService.generateRefreshToken(entity)).build();
+        return AuthenticationResponseDto.builder().token(jwtService.generateToken(entity)).build();
     }
 
     @Transactional
@@ -91,24 +94,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Entity entity = Entity.builder()
                 .creationDate(new Date(System.currentTimeMillis()))
                 .emailConfirmed(false)
+                .phoneConfirmed(false)
                 .locked(false)
                 .signActivated(false)
                 .type(EntityType.PHYSICAL)
                 .loginAttempts((short)0)
                 .employee(false)
+                .lastAttempt(new Date())
                 .build();
 
-        if(passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())){
-            throw new CustomException("USERS-003", "Password does not fit password requirements", 400);
+        if(!passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())){
+            throw new CustomException("USERS-006", "Password does not fit password requirements", 400);
         }
         if(registerPhysicalDto.getDebtType() != EntityDebtType.FREELANCE
                 && registerPhysicalDto.getDebtType() != EntityDebtType.STATE_WORKER
                 && registerPhysicalDto.getDebtType() != EntityDebtType.SALARIED
                 && registerPhysicalDto.getDebtType() != EntityDebtType.PENSIONER ){
-            throw new CustomException("USERS-004", "Physical person cannot have company debt type", 400);
+            throw new CustomException("USERS-007", "Physical person cannot have company debt type", 400);
         }
-        if(registerPhysicalDto.getNationalIdExpiration().before(new Date()))
-            throw new CustomException("USERS-005", "You national document has expirated.", 400);
+        if(registerPhysicalDto.getNationalIdExpiration().after(new Date()))
+            throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
         nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getRemoteAddr());
@@ -122,22 +127,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Entity entity = Entity.builder()
                 .creationDate(new Date(System.currentTimeMillis()))
                 .emailConfirmed(false)
+                .phoneConfirmed(false)
                 .locked(false)
                 .signActivated(false)
                 .type(EntityType.COMPANY)
                 .loginAttempts((short)0)
                 .employee(false)
+                .lastAttempt(new Date())
                 .build();
 
-        if(passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())){
-            throw new CustomException("USERS-003", "Password does not fit password requirements", 400);
+        if(!passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())){
+            throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
         }
         if(registerCompanyDto.getDebtType() != EntityDebtType.PYME
                 && registerCompanyDto.getDebtType() != EntityDebtType.MICROCOMPANY
                 && registerCompanyDto.getDebtType() != EntityDebtType.STARTUP
                 && registerCompanyDto.getDebtType() != EntityDebtType.COMPANY ){
-            throw new CustomException("USERS-004", "Company canoot have physical person debt type", 400);
+            throw new CustomException("USERS-010", "Company canoot have physical person debt type", 400);
         }
+        if(registerCompanyDto.getSettingUpDate().after(new Date()))
+            throw new CustomException("USERS-011", "Company set up date cannot be a date after today", 400);
 
 
         nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
