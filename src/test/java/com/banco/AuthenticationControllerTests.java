@@ -130,7 +130,7 @@ public class AuthenticationControllerTests {
                 .birthday(new Date())
                 .taxId("12345678A")
                 .password("%Testing12")
-                .nationalIdExpiration(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(200)))
+                .nationalIdExpiration(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(200)))
                 .address("Address")
                 .addressAdditionalInfo("Address additional info")
                 .postalCode("postal")
