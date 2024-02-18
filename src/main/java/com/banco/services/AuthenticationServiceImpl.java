@@ -112,7 +112,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 && registerPhysicalDto.getDebtType() != EntityDebtType.PENSIONER ){
             throw new CustomException("USERS-007", "Physical person cannot have company debt type", 400);
         }
-        if(registerPhysicalDto.getNationalIdExpiration().after(new Date()))
+        if(registerPhysicalDto.getNationalIdExpiration().before(new Date()))
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
         nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);

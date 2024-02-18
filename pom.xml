@@ -8,9 +8,9 @@
         <version>3.2.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.community</groupId>
-    <artifactId>communitydev</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <groupId>com.banco</groupId>
+    <artifactId>bancodelapeseta</artifactId>
+    <version>1.0.0</version>
     <name>bancodelapeseta</name>
     <description>bancodelapeseta</description>
     <properties>
