@@ -30,16 +30,6 @@ public class SecurityConfiguration {
     @Value("${endpoints.noauth}")
     private final List<String> NO_AUTH_ENDPOINTS;
 
-    @Value("${endpoints.cashier}")
-    private final List<String> CASHIER_ENPOINTS;
-
-    @Value("${endpoints.employee}")
-    private final List<String> EMPLOYEE_ENDPOINTS;
-    @Value("${endpoints.tpv}")
-    private final List<String> TPV_ENDPOINTS;
-    @Value("${endpoints.admin}")
-    private final List<String> ADMIN_ENDPOINTS;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
