@@ -25,15 +25,12 @@ public class JwtService {
     private final String JWT_SECRET;
     @Value("${jwt.expiration}")
     private final Long JWT_EXPIRATION;
-    @Value("${jwt.refresh.expiration}")
-    private final Long JWT_REFRESH_EXPIRATION;
+
 
     public JwtService(@Value("${jwt.secret}") String JWT_SECRET,
-                      @Value("${jwt.expiration}") Long JWT_EXPIRATION,
-                      @Value("${jwt.refresh.expiration}") Long JWT_REFRESH_EXPIRATION) {
+                      @Value("${jwt.expiration}") Long JWT_EXPIRATION) {
         this.JWT_SECRET = JWT_SECRET;
         this.JWT_EXPIRATION = JWT_EXPIRATION;
-        this.JWT_REFRESH_EXPIRATION = JWT_REFRESH_EXPIRATION;
     }
 
     public String extractEmail(String token) {
@@ -47,13 +44,6 @@ public class JwtService {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         return claimsResolver.apply(extractAllClaims(token));
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        return Jwts.builder().subject(userDetails.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(JWT_EXPIRATION)))
-                .claims(new HashMap<>()).signWith(getSignInKey()).compact();
     }
 
     public String generateToken(Entity entityDetails) {
