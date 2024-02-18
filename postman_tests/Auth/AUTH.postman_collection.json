@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "09e2968a-1e26-40d8-a945-e384c4b02ba6",
+		"name": "AUTH",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16535267",
+		"_collection_link": "https://www.postman.com/planetary-meteor-511870/workspace/bancodelapeseta/collection/16535267-09e2968a-1e26-40d8-a945-e384c4b02ba6?action=share&source=collection_link&creator=16535267"
+	},
+	"item": [
+		{
+			"name": "REGISTER PHYSICAL - 201",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"surname\":\"ConDaniel\",\r\n    \"birthday\":\"2021-01-01\",\r\n    \"taxId\":\"123456789A\",\r\n    \"password\":\"%Testing12\",\r\n    \"nationalIdExpiration\":\"2024-10-10\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"gender\":\"M\",\r\n    \"nationality\":\"Española\",\r\n    \"birthCity\":\"Madrid\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"FREELANCE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/physical",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"physical"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REGISTER COMPANY - 201",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"taxId\":\"B12345678\",\r\n    \"password\":\"%Testing12\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"PYME\",\r\n    \"settingUpDate\": \"2021-07-01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/company",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LOGIN - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json();\r",
+							"pm.environment.set('Authorization', 'Bearer ' + response.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"123456789A\",\r\n    \"password\":\"%Testing12\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/login",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-006 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"surname\":\"ConDaniel\",\r\n    \"birthday\":\"2021-01-01\",\r\n    \"taxId\":\"123456789A\",\r\n    \"password\":\"esting12\",\r\n    \"nationalIdExpiration\":\"2024-10-10\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"gender\":\"M\",\r\n    \"nationality\":\"Española\",\r\n    \"birthCity\":\"Madrid\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"FREELANCE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/physical",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"physical"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-007 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"surname\":\"ConDaniel\",\r\n    \"birthday\":\"2021-01-01\",\r\n    \"taxId\":\"123456789A\",\r\n    \"password\":\"%Testing12\",\r\n    \"nationalIdExpiration\":\"2024-10-10\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"gender\":\"M\",\r\n    \"nationality\":\"Española\",\r\n    \"birthCity\":\"Madrid\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"PYME\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/physical",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"physical"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-008 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"surname\":\"ConDaniel\",\r\n    \"birthday\":\"2021-01-01\",\r\n    \"taxId\":\"123456789A\",\r\n    \"password\":\"%Testing12\",\r\n    \"nationalIdExpiration\":\"2023-10-10\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"gender\":\"M\",\r\n    \"nationality\":\"Española\",\r\n    \"birthCity\":\"Madrid\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"FREELANCE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/physical",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"physical"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-009 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"taxId\":\"B12345678\",\r\n    \"password\":\"Testing12\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"PYME\",\r\n    \"settingUpDate\": \"2021-07-01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/company",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-010 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"taxId\":\"B12345678\",\r\n    \"password\":\"%Testing12\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"FREELANCE\",\r\n    \"settingUpDate\": \"2021-07-01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/company",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "USERS-011 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"taxId\":\"B12345678\",\r\n    \"password\":\"%Testing12\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"PYME\",\r\n    \"settingUpDate\": \"2025-07-01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/company",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DATABASE-001 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"taxId\":\"B12345678\",\r\n    \"password\":\"%Testing12\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"PYME\",\r\n    \"settingUpDate\": \"2021-07-01\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/company",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DATABASE-001 - 400",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Programa\",\r\n    \"surname\":\"ConDaniel\",\r\n    \"birthday\":\"2021-01-01\",\r\n    \"taxId\":\"123456789A\",\r\n    \"password\":\"%Testing12\",\r\n    \"nationalIdExpiration\":\"2024-10-10\",\r\n    \"address\":\"Calle hola mi amigo\",\r\n    \"addressAdditionalInfo\":\"Piso 2 Escalera 3\",\r\n    \"postalCode\": \"22454\",\r\n    \"addressTown\":\"Madrid\",\r\n    \"addressCity\":\"Madrid\",\r\n    \"addressCountry\":\"España\",\r\n    \"gender\":\"M\",\r\n    \"nationality\":\"Española\",\r\n    \"birthCity\":\"Madrid\",\r\n    \"phoneNumber\":\"665666555\",\r\n    \"email\":\"test@test.com\",\r\n    \"debtType\":\"FREELANCE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/auth/register/physical",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"auth",
+						"register",
+						"physical"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
