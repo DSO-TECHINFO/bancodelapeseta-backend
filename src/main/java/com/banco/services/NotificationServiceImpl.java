@@ -38,6 +38,8 @@ public class NotificationServiceImpl implements NotificationService{
     private String sourceMail;
     @Value("${frontend.endpoint}")
     private String frontendEndpoint;
+    @Value("env")
+    private String environment;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -182,6 +184,8 @@ public class NotificationServiceImpl implements NotificationService{
             entity.setNextSendEmail(new Date( System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entityRepository.save(entity);
         } catch (Exception ex) {
+            if(environment.equals("local")||environment.equals("dev"))
+                throw new CustomException("EMAILS-001", ex.getMessage(), 500);
             throw new CustomException("EMAILS-001", "Email could not be sent", 500);
         }
     }
