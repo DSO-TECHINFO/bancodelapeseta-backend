@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -26,7 +27,11 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import software.amazon.awssdk.core.SdkResponse;
+import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.util.Optional;
 
@@ -53,29 +58,28 @@ public class NotificationControllerTests {
     private JwtService jwtService;
 
 
-    @BeforeEach
-    public void setContext(){
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext mockedContext = mock(SecurityContext.class);
-        when(mockedContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(mockedContext);
-        when(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).thenReturn(Entity.builder().build());
-    }
+
 
     @WithMockUser
     @Test
     @Transactional
     public void testSimpleEmailServiceOk() throws Exception {
-
-
-
         when(amazonSimpleEmailService.sendEmail(any())).thenReturn(null);
         when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(true).phoneConfirmed(true).build()));
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/send/email/verification/code").header("Authorization", jwtService.generateToken(new Entity())))
                 .andExpect(status().isOk());
-
-
+    }
+    @WithMockUser
+    @Test
+    @Transactional
+    public void testSMSServiceOk() throws Exception {
+        SdkHttpResponse response = SdkHttpResponse.builder().statusCode(HttpStatus.OK.value()).build();
+        when(snsClient.publish((PublishRequest) any())).thenReturn((PublishResponse) PublishResponse.builder().sdkHttpResponse(response).build());
+        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(true).phoneConfirmed(true).build()));
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/send/phone/verification/code").header("Authorization", jwtService.generateToken(new Entity())))
+                .andExpect(status().isOk());
     }
 
 }

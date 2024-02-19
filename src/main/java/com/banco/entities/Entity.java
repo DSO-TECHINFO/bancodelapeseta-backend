@@ -189,6 +189,9 @@ public class Entity implements UserDetails {
     private Date nextSendPhone;
 
     @JsonIgnore
+    @Column
+    private String lastIpAddress;
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();

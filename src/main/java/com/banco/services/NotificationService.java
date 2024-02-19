@@ -13,4 +13,19 @@ public interface NotificationService {
     void sendEmailVerificationCode() throws CustomException;
 
     void sendPhoneVerificationCode() throws CustomException;
+    void sendAccountDataModification() throws CustomException;
+    void sendCardCharge() throws CustomException;
+    void sendCompletedLoan() throws CustomException;
+    void sendCreatedNewBankAccount() throws CustomException;
+    void sendCreatedNewCard() throws CustomException;
+    void sendCreatedNewLoan() throws CustomException;
+    void sendEmailModification() throws CustomException;
+    void sendNewLogin() throws CustomException;
+    void sendRecalculatedLoan() throws CustomException;
+    void sendSignModification() throws CustomException;
+    void sendTransactionVerification() throws CustomException;
+    void sendTransferReceived() throws CustomException;
+    void sendTransferSent() throws CustomException;
+    void sendUnpaidLoanSubscription() throws CustomException;
+    void sendWelcome() throws CustomException;
 }
