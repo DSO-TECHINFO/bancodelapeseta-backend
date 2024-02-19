@@ -80,6 +80,8 @@ public class ExceptionManager {
             e.printStackTrace();
         details.put("path", request.getContextPath());
         details.put("sessionId", request.getSessionId());
+        if(environment.equals("local")||environment.equals("dev"))
+            return ResponseEntity.status(status).body(GlobalException.builder().reason(e.getMessage()).code(code).status(status).details(details).build());
         return ResponseEntity.status(status).body(GlobalException.builder().reason(customMessage).code(code).status(status).details(details).build());
     }
 
