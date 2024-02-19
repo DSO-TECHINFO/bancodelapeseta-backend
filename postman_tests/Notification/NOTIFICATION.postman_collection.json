@@ -1,0 +1,63 @@
+{
+	"info": {
+		"_postman_id": "ab27a4f7-7fb3-4c80-8dce-91d1b35ff6a4",
+		"name": "NOTIFICATION",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16535267",
+		"_collection_link": "https://www.postman.com/planetary-meteor-511870/workspace/bancodelapeseta/collection/16535267-ab27a4f7-7fb3-4c80-8dce-91d1b35ff6a4?action=share&source=collection_link&creator=16535267"
+	},
+	"item": [
+		{
+			"name": "SEND EMAIL VERIFICATION CODE",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{HOST}}/send/email/verification/code",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"send",
+						"email",
+						"verification",
+						"code"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SEND PHONE VERIFICATION CODE",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{HOST}}/send/phone/verification/code",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"send",
+						"phone",
+						"verification",
+						"code"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
