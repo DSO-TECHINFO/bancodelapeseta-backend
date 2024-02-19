@@ -76,8 +76,6 @@ public class ExceptionManager {
 
     private ResponseEntity<GlobalException> setInformation(Exception e, String code, String customMessage, WebRequest request, Integer status) {
         Map<String, Object> details = new HashMap<>();
-        if (environment.equals("local") || environment.equals("dev"))
-            e.printStackTrace();
         details.put("path", request.getContextPath());
         details.put("sessionId", request.getSessionId());
         if(environment.equals("local")||environment.equals("dev"))
@@ -87,8 +85,6 @@ public class ExceptionManager {
 
     private ResponseEntity<GlobalException> setInformation(Exception e, String code, WebRequest request, Integer status) {
         Map<String, Object> details = new HashMap<>();
-        if (environment.equals("local") || environment.equals("dev"))
-            e.printStackTrace();
         details.put("path", request.getContextPath());
         details.put("sessionId", request.getSessionId());
         return ResponseEntity.status(status).body(GlobalException.builder().reason(e.getMessage()).code(code).status(status).details(details).build());

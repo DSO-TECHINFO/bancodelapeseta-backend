@@ -38,7 +38,7 @@ public class NotificationServiceImpl implements NotificationService{
     private String sourceMail;
     @Value("${frontend.endpoint}")
     private String frontendEndpoint;
-    @Value("env")
+    @Value("${env}")
     private String environment;
 
     @Autowired
