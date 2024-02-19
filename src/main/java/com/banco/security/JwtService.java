@@ -60,7 +60,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Entity entity = (Entity) userDetails;
-        return entity.getEmail().equals(extractTaxId(token)) && !isTokenExpired(token);
+        return entity.getTaxId().equals(extractTaxId(token)) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

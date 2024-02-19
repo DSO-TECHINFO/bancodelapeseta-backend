@@ -2,9 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido al Banco de la Peseta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Montserrat", sans-serif;
+            background: rgb(0, 234, 194);
+            background: linear-gradient(160deg, rgba(0,234,194,1) 0%, rgb(53, 115, 185) 100%);
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+        }
+        #welcome {
+            background-color: white;
+            color: rgb(29, 29, 31);
 
+            width: 60%;
+            height: 100vh;
+            margin: auto;
+
+            text-align: center;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #description{
+            font-weight: 500;
+        }
+        #msgWelcome{
+            color: #86868B;
+        }
+        #send{
+            margin: 10px;
+        }
+        #btnSend{
+            background: rgb(0,234,194);
+            background: linear-gradient(160deg, rgba(0,234,194,1) 0%, rgb(53, 115, 185) 100%);
+            border: 0;
+            padding: 10px 25px 10px 25px;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+<div id="main">
+    <div id="welcome">
+        <div class="image">
+            <img src="https://i.ibb.co/yfCT2yZ/bancoP.png" alt="bancoP" border="0" width="100px">
+        </div>
+        <div id="title">
+            <h1>Bienvenido al Banco de la Peseta</h1>
+        </div>
+        <div id="description">
+            <p>Estamos encantados de saludarte</p>
+        </div>
+        <div id="msgWelcome">
+            Bienvenido,{{user_name}}
+        </div>
+        <div id="send">
+            <button id="btnSend">ENTRAR</button>
+        </div>
+    </div>
+</div>
 </body>
+
 </html>
