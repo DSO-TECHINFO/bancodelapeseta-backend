@@ -162,11 +162,11 @@ public class NotificationServiceImpl implements NotificationService{
 
 
     private void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
+        if(entity.getNextSendEmail() != null && entity.getNextSendEmail().before(new Date()))
+            throw new CustomException("NOTIFICATIONS-001", "You have to wait 10 minutes to send it again", 400);
+        if(entity.getEmailConfirmed())
+            throw new CustomException("NOTIFICATIONS-005", "Your email is already verified", 400);
         try {
-            if(entity.getNextSendEmail() != null && entity.getNextSendEmail().before(new Date()))
-                throw new CustomException("NOTIFICATIONS-001", "You have to wait 10 minutes to send it again", 400);
-            if(entity.getEmailConfirmed())
-                throw new CustomException("NOTIFICATIONS-005", "Your email is already verified", 400);
             Map<String, Object> template = loadMailTemplate(keysToReplace, emailType);
             SendEmailRequest request = new SendEmailRequest()
                     .withDestination(
