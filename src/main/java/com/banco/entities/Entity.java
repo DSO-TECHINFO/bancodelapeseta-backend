@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -179,7 +180,17 @@ public class Entity implements UserDetails {
     @JsonIgnore
     @Column
     private String createdIpAddress;
+    @JsonIgnore
+    @Column
+    private Date nextSendEmail;
 
+    @JsonIgnore
+    @Column
+    private Date nextSendPhone;
+
+    @JsonIgnore
+    @Column
+    private String lastIpAddress;
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -208,7 +219,7 @@ public class Entity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return emailConfirmed && phoneConfirmed;
+        return true;
     }
 
     @Override
