@@ -35,7 +35,7 @@ public class AccountVerifiedFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String requestServletPath = request.getRequestURI();
+        String requestServletPath = request.getRequestURI().replace("/api/v1","");
         if(noAuthEndpoints.stream().noneMatch(endpoint -> endpoint.equals(requestServletPath)) && notVerifiedEndpoints.stream().noneMatch(endpoint -> endpoint.equals(requestServletPath))){
             String token = request.getHeader("Authorization");
             token = token.replace("Bearer ", "");
