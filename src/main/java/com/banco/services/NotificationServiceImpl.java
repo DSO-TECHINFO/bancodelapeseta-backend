@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService{
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
         if(userOptional.isEmpty())
-            throw new CustomException("NOTIFICATIONS-003", "User not found", 404);
+            throw new CustomException("NOTIFICATIONS-001", "User not found", 404);
         Entity user = userOptional.get();
         String code = RandomStringUtils.randomAlphanumeric(50);
         String coded = passwordEncoder.encode(code);
@@ -74,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService{
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
         if(userOptional.isEmpty())
-            throw new CustomException("NOTIFICATIONS-003", "User not found", 404);
+            throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
         Entity user = userOptional.get();
         String code = RandomStringUtils.randomNumeric(6);
         String coded = passwordEncoder.encode(code);
@@ -165,9 +166,9 @@ public class NotificationServiceImpl implements NotificationService{
 
     private void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
         if(entity.getNextSendEmail() != null && entity.getNextSendEmail().after(new Date()))
-            throw new CustomException("NOTIFICATIONS-001", "You have to wait 10 minutes to send it again", 400);
+            throw new CustomException("NOTIFICATIONS-003", "You have to wait 10 minutes to send it again", 400);
         if(entity.getEmailConfirmed())
-            throw new CustomException("NOTIFICATIONS-005", "Your email is already verified", 400);
+            throw new CustomException("NOTIFICATIONS-004", "Your email is already verified", 400);
         try {
             Map<String, Object> template = loadMailTemplate(keysToReplace, emailType);
             SendEmailRequest request = new SendEmailRequest()
@@ -185,106 +186,105 @@ public class NotificationServiceImpl implements NotificationService{
             entityRepository.save(entity);
         } catch (Exception ex) {
             if(environment.equals("local")||environment.equals("dev"))
-                throw new CustomException("EMAILS-001", ex.getMessage(), 500);
-            throw new CustomException("EMAILS-001", "Email could not be sent", 500);
+                throw new CustomException("NOTIFICATIONS-005", ex.getMessage(), 500);
+            throw new CustomException("NOTIFICATIONS-005", "Email could not be sent", 500);
         }
     }
 
     private void sendSMS(Map<String, Object> data, Entity entity, SMSType smsType) throws CustomException {
         if(entity.getNextSendPhone() != null && entity.getNextSendPhone().after(new Date()))
-            throw new CustomException("NOTIFICATIONS-002", "You have to wait 10 minutes to send it again", 400);
+            throw new CustomException("NOTIFICATIONS-006", "You have to wait 10 minutes to send it again", 400);
         if(entity.getPhoneConfirmed())
-            throw new CustomException("NOTIFICATIONS-004", "Your phone is already verified", 400);
+            throw new CustomException("NOTIFICATIONS-006", "Your phone is already verified", 400);
         Map<String, Object> template = loadSMSTemplate(data, smsType);
         String message = (String) template.get("text");
         String phoneNumber = entity.getPhoneNumber();
 
         pubTextSMS(snsClient, message, phoneNumber);
-        snsClient.close();
         entity.setNextSendPhone(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(entity);
     }
     private Map<String,Object> loadMailTemplate(Map<String, Object> data, EmailType emailType) throws IOException {
-        String template;
+        URL template;
         Map<String, Object> returnTemplate = new HashMap<>();
         switch (emailType){
             case ACCOUNT_DATA_MODIFICATION -> {
-                template = "src/main/resources/templates//account_data_modification.html";
+                template = ClassLoader.getSystemResource("templates/account_data_modification.html");
                 returnTemplate.put("subject", "Account data modified");
             }
             case CARD_CHARGE -> {
-                template = "src/main/resources/templates//card_charge.html";
+                template = ClassLoader.getSystemResource("templates/card_charge.html");
                 returnTemplate.put("subject", "New charge in one of your cards");
             }
             case CARD_SENT -> {
-                template = "src/main/resources/templates//card_sent.html";
+                template = ClassLoader.getSystemResource("templates/card_sent.html");
                 returnTemplate.put("subject", "Your card was sent");
             }
             case COMPLETED_LOAN -> {
-                template = "src/main/resources/templates//completed_loan.html";
+                template = ClassLoader.getSystemResource("templates/completed_loan.html");
                 returnTemplate.put("subject", "Your loan was completed and closed");
             }
             case CREATED_NEW_BANK_ACCOUNT -> {
-                template = "src/main/resources/templates//created_new_bank_account.html";
+                template = ClassLoader.getSystemResource("templates/created_new_bank_account.html");
                 returnTemplate.put("subject", "New bank account created");
             }
             case CREATED_NEW_CARD ->{
-                template = "src/main/resources/templates//created_new_card.html";
+                template = ClassLoader.getSystemResource("templates/created_new_card.html");
                 returnTemplate.put("subject", "New card was created");
             }
             case CREATED_NEW_LOAN -> {
-                template = "src/main/resources/templates//created_new_loan.html";
+                template = ClassLoader.getSystemResource("templates/created_new_loan.html");
                 returnTemplate.put("subject", "New loan was created");
             }
             case EMAIL_VERIFICATION -> {
-                template = "src/main/resources/templates//email_verification.html";
+                template = ClassLoader.getSystemResource("templates/email_verification.html");
                 returnTemplate.put("subject", "Email verification");
             }
             case EMAIL_MODIFICATION -> {
-                template = "src/main/resources/templates//email_modification.html";
+                template = ClassLoader.getSystemResource("templates/email_modification.html");
                 returnTemplate.put("subject", "Enter this code to modify your current email");
             }
             case NEW_LOGIN -> {
-                template = "src/main/resources/templates//new_login.html";
+                template = ClassLoader.getSystemResource("templates/new_login.html");
                 returnTemplate.put("subject", "New login detected");
             }
             case PHONE_MODIFICATION -> {
-                template = "src/main/resources/templates//phone_modification.html";
+                template = ClassLoader.getSystemResource("templates/phone_modification.html");
                 returnTemplate.put("subject", "Your phone was modified");
             }
             case RECALCULATED_LOAN -> {
-                template = "src/main/resources/templates//recalculated_loan.html";
+                template = ClassLoader.getSystemResource("templates/recalculated_loan.html");
                 returnTemplate.put("subject", "Your loan has been recalculated");
             }
             case SIGN_MODIFICATION -> {
-                template = "src/main/resources/templates//sign_modification.html";
+                template = ClassLoader.getSystemResource("templates/sign_modification.html");
                 returnTemplate.put("subject", "Enter this code to modify sign");
             }
             case TRANSACTION_VERIFICATION -> {
-                template = "src/main/resources/templates//transaction_verification.html";
+                template = ClassLoader.getSystemResource("templates/transaction_verification.html");
                 returnTemplate.put("subject", "Enter this code to verify transaction");
             }
             case TRANSFER_RECEIVED -> {
-                template = "src/main/resources/templates//transfer_received.html";
+                template = ClassLoader.getSystemResource("templates/transfer_received.html");
                 returnTemplate.put("subject", "Transfer was received");
             }
             case TRANSFER_SENT -> {
-                template = "src/main/resources/templates//transfer_sent.html";
+                template = ClassLoader.getSystemResource("templates/transfer_sent.html");
                 returnTemplate.put("subject", "Transfer was sent from your account");
             }
             case UNPAID_LOAN_SUBSCRIPTION -> {
-                template = "src/main/resources/templates//unpaid_loan_subscription.html";
+                template = ClassLoader.getSystemResource("templates/unpaid_loan_subscription.html");
                 returnTemplate.put("subject", "A loan monthly subscription was not successfully paid");
             }
             default -> {
-                template = "src/main/resources/templates//welcome.html";
+                template = ClassLoader.getSystemResource("templates/welcome.html");
                 returnTemplate.put("subject", "Welcome to Banco De la Peseta");
             }
         }
         StringBuilder bldr = new StringBuilder();
         String str;
 
-        BufferedReader in = new BufferedReader(new FileReader(template));
+        BufferedReader in = new BufferedReader(new FileReader(template.getFile()));
         while((str = in.readLine())!=null)
             bldr.append(str);
 
@@ -322,7 +322,7 @@ public class NotificationServiceImpl implements NotificationService{
 
             PublishResponse result = snsClient.publish(request);
             if(!result.sdkHttpResponse().isSuccessful()){
-                throw new CustomException("NOTIFICATIONS-002", "Message not sent", 500);
+                throw new CustomException("NOTIFICATIONS-007", "Message not sent", 500);
             }
 
     }
