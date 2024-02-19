@@ -25,7 +25,8 @@ public class SecurityConfiguration {
 
 
     private final AuthenticationProvider authenticationProvider;
-    private final Filter jwtAuthFilter;
+    private final JWTAuthenticationFilter jwtAuthFilter;
+    private final AccountVerifiedFilter accountVerifiedFilter;
 
     @Value("${endpoints.noauth}")
     private final List<String> NO_AUTH_ENDPOINTS;
@@ -42,7 +43,8 @@ public class SecurityConfiguration {
                 }).sessionManagement(
                         (sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(accountVerifiedFilter, JWTAuthenticationFilter.class);
 
         http.exceptionHandling((exceptionHandling) -> exceptionHandling
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
