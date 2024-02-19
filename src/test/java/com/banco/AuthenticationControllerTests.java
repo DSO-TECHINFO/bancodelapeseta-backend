@@ -2,6 +2,7 @@ package com.banco;
 
 import com.banco.dtos.AuthenticationRequestDto;
 
+import com.banco.dtos.RegisterCompanyDto;
 import com.banco.dtos.RegisterPhysicalDto;
 import com.banco.entities.Entity;
 import com.banco.entities.EntityDebtType;
@@ -151,4 +152,28 @@ public class AuthenticationControllerTests {
                 .andExpect(status().isCreated()).andReturn();
     }
 
+    @Test
+    @Transactional
+    public void testRegisterCompany() throws Exception {
+        RegisterCompanyDto registerPhysicalDto = RegisterCompanyDto.builder()
+                .name("Name")
+                .taxId("12345678A")
+                .password("%Testing12")
+                .address("Address")
+                .addressAdditionalInfo("Address additional info")
+                .postalCode("postal")
+                .addressTown("address town")
+                .addressCity("address city")
+                .addressCountry("address country")
+                .phoneNumber("phone number")
+                .email("email")
+                .debtType(EntityDebtType.PYME)
+                .settingUpDate(new Date())
+                .build();
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/register/company")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(registerPhysicalDto)))
+                .andExpect(status().isCreated()).andReturn();
+    }
 }

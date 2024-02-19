@@ -162,7 +162,7 @@ public class NotificationServiceImpl implements NotificationService{
 
 
     private void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
-        if(entity.getNextSendEmail() != null && entity.getNextSendEmail().before(new Date()))
+        if(entity.getNextSendEmail() != null && entity.getNextSendEmail().after(new Date()))
             throw new CustomException("NOTIFICATIONS-001", "You have to wait 10 minutes to send it again", 400);
         if(entity.getEmailConfirmed())
             throw new CustomException("NOTIFICATIONS-005", "Your email is already verified", 400);
@@ -187,7 +187,7 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     private void sendSMS(Map<String, Object> data, Entity entity, SMSType smsType) throws CustomException {
-        if(entity.getNextSendPhone() != null && entity.getNextSendPhone().before(new Date()))
+        if(entity.getNextSendPhone() != null && entity.getNextSendPhone().after(new Date()))
             throw new CustomException("NOTIFICATIONS-002", "You have to wait 10 minutes to send it again", 400);
         if(entity.getPhoneConfirmed())
             throw new CustomException("NOTIFICATIONS-004", "Your phone is already verified", 400);
