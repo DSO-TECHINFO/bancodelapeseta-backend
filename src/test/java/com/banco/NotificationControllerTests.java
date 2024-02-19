@@ -65,7 +65,7 @@ public class NotificationControllerTests {
     @Transactional
     public void testSimpleEmailServiceOk() throws Exception {
         when(amazonSimpleEmailService.sendEmail(any())).thenReturn(null);
-        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(true).phoneConfirmed(true).build()));
+        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(false).phoneConfirmed(false).build()));
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/send/email/verification/code").header("Authorization", jwtService.generateToken(new Entity())))
                 .andExpect(status().isOk());
@@ -76,7 +76,7 @@ public class NotificationControllerTests {
     public void testSMSServiceOk() throws Exception {
         SdkHttpResponse response = SdkHttpResponse.builder().statusCode(HttpStatus.OK.value()).build();
         when(snsClient.publish((PublishRequest) any())).thenReturn((PublishResponse) PublishResponse.builder().sdkHttpResponse(response).build());
-        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(true).phoneConfirmed(true).build()));
+        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(false).phoneConfirmed(false).build()));
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/send/phone/verification/code").header("Authorization", jwtService.generateToken(new Entity())))
                 .andExpect(status().isOk());
