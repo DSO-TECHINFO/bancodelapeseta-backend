@@ -208,7 +208,7 @@ public class Entity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return emailConfirmed && phoneConfirmed;
+        return true;
     }
 
     @Override

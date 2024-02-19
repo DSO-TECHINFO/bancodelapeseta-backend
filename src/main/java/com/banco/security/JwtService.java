@@ -4,6 +4,7 @@ import com.banco.entities.Entity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+import io.jsonwebtoken.security.AeadAlgorithm;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+import java.security.Key;
+import java.security.PrivateKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +36,12 @@ public class JwtService {
         this.JWT_EXPIRATION = JWT_EXPIRATION;
     }
 
-    public String extractEmail(String token) {
+    public String extractTaxId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     public Claims extractAllClaims(String token) {
-        return Jwts.parser().decryptWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
-
+        return Jwts.parser().verifyWith(getSignInKey()).build().parseSignedClaims(token).getPayload();
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -51,14 +53,14 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, Entity entityDetails) {
-        return Jwts.builder().claims(extraClaims).subject(entityDetails.getEmail()).issuedAt(new Date(System.currentTimeMillis()))
+        return Jwts.builder().claims(extraClaims).subject(entityDetails.getTaxId()).issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(JWT_EXPIRATION))).signWith(getSignInKey())
                 .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Entity entity = (Entity) userDetails;
-        return entity.getEmail().equals(extractEmail(token)) && !isTokenExpired(token);
+        return entity.getEmail().equals(extractTaxId(token)) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
