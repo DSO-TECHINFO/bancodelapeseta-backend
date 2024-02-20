@@ -1,8 +1,6 @@
 package com.banco.controllers;
 
-import com.banco.dtos.AuthenticationRequestDto;
-import com.banco.dtos.RegisterCompanyDto;
-import com.banco.dtos.RegisterPhysicalDto;
+import com.banco.dtos.*;
 import com.banco.exceptions.CustomException;
 import com.banco.services.AuthenticationService;
 
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 
 
 @AllArgsConstructor
@@ -25,7 +24,7 @@ public class AuthenticationController {
     public final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException {
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
         return ResponseEntity.ok(authenticationService.login(authenticationRequestDto, request));
     }
 
@@ -39,5 +38,24 @@ public class AuthenticationController {
         authenticationService.registerCompany(registerCompanyDto, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
+    @PostMapping("/password/change")
+    public ResponseEntity<?> passwordChange(@RequestBody PasswordChangeDto passwordChangeDto) throws CustomException {
+        authenticationService.passwordChange(passwordChangeDto);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/change/email")
+    public ResponseEntity<?> emailChange(@RequestBody EmailChangeDto emailChangeDto) throws CustomException {
+        authenticationService.emailChange(emailChangeDto);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/change/phone")
+    public ResponseEntity<?> phoneChange(@RequestBody PhoneChangeDto phoneChangeDto) throws CustomException {
+        authenticationService.phoneChange(phoneChangeDto);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/create/sign")
+    public ResponseEntity<?> createSign(@RequestBody SignCreateDto signCreateDto) throws CustomException {
+        authenticationService.signCreate(signCreateDto);
+        return ResponseEntity.ok().build();
+    }
 }

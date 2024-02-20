@@ -6,6 +6,7 @@ import com.banco.entities.SMSType;
 import com.banco.exceptions.CustomException;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.util.Map;
 
 public interface NotificationService {
@@ -20,7 +21,7 @@ public interface NotificationService {
     void sendCreatedNewCard() throws CustomException;
     void sendCreatedNewLoan() throws CustomException;
     void sendEmailModification() throws CustomException;
-    void sendNewLogin(Entity entity,String address) throws CustomException;
+    void sendNewLogin(Entity entity,String address) throws CustomException, IOException;
     void sendRecalculatedLoan() throws CustomException;
     void sendSignModification() throws CustomException;
     void sendTransactionVerification() throws CustomException;

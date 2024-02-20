@@ -1,10 +1,7 @@
 package com.banco.services;
 
 
-import com.banco.dtos.AuthenticationRequestDto;
-import com.banco.dtos.AuthenticationResponseDto;
-import com.banco.dtos.RegisterCompanyDto;
-import com.banco.dtos.RegisterPhysicalDto;
+import com.banco.dtos.*;
 import com.banco.entities.Entity;
 import com.banco.entities.EntityDebtType;
 import com.banco.entities.EntityType;
@@ -23,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -44,9 +42,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordUtils passwordUtils;
     private final NonNullFields nonNullFields;
     private final NotificationService notificationService;
-
+    private final VerifyService verifyService;
     @Override
-    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException {
+    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
@@ -87,8 +85,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         Entity entity = entityRepository.findByTaxId(authenticationRequestDto.getUsername()).orElseThrow();
         entity.setLoginAttempts((short) 0);
-        //if(!entity.getLastIpAddress().equals(request.getHeader("X-FORWARDED-FOR")))
-          //  notificationService.sendNewLogin(entity,request.getRemoteAddr());
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        String userAgent = request.getHeader("User-Agent");
+        if(entity.getLastIpAddress() != null
+                && !entity.getLastIpAddress().equals(ipAddress)
+                && entity.getUserBrowser() != null
+                && entity.getUserBrowser().equals(userAgent))
+            notificationService.sendNewLogin(entity,request.getRemoteAddr());
+        entity.setLastIpAddress(ipAddress);
+        entity.setUserBrowser(userAgent);
         entityRepository.save(entity);
         return AuthenticationResponseDto.builder().token(jwtService.generateToken(entity)).build();
     }
@@ -96,6 +101,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException {
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        String userAgent = request.getHeader("User-Agent");
         Entity entity = Entity.builder()
                 .creationDate(new Date(System.currentTimeMillis()))
                 .emailConfirmed(false)
@@ -106,6 +113,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .loginAttempts((short)0)
                 .employee(false)
                 .lastAttempt(new Date())
+                .lastIpAddress(ipAddress)
+                .userBrowser(userAgent)
+                .createdIpAddress(ipAddress)
                 .build();
 
         if(!passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())){
@@ -120,6 +130,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(registerPhysicalDto.getNationalIdExpiration().before(new Date()))
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
+
         nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.PHYSICAL);
@@ -129,6 +140,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public void registerCompany(RegisterCompanyDto registerCompanyDto, HttpServletRequest request) throws CustomException {
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        String userAgent = request.getHeader("User-Agent");
         Entity entity = Entity.builder()
                 .creationDate(new Date(System.currentTimeMillis()))
                 .emailConfirmed(false)
@@ -139,6 +152,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .loginAttempts((short)0)
                 .employee(false)
                 .lastAttempt(new Date())
+                .lastIpAddress(ipAddress)
+                .userBrowser(userAgent)
+                .createdIpAddress(ipAddress)
                 .build();
 
         if(!passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())){
@@ -160,6 +176,52 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setType(EntityType.COMPANY);
         entity.setPassword(passwordEncoder.encode(registerCompanyDto.getPassword()));
         entityRepository.save(entity);
+    }
+
+    @Override
+    public void passwordChange(PasswordChangeDto passwordChangeDto) throws CustomException {
+        Entity user = extractUser();
+        if(verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(),true)){
+            user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+            entityRepository.save(user);
+        }
+    }
+
+    @Override
+    public void emailChange(EmailChangeDto emailChangeDto) throws CustomException {
+        Entity entity = verifyService.verifyWithPhoneCode(emailChangeDto.getPhoneCode());
+        verifyService.verifyWithSign(emailChangeDto.getSign());
+        entity.setEmail(emailChangeDto.getNewEmail());
+        entityRepository.save(entity);
+    }
+
+    @Override
+    public void phoneChange(PhoneChangeDto phoneChangeDto) throws CustomException {
+        Entity entity = verifyService.verifyWithEmailCode(phoneChangeDto.getEmailCode());
+        verifyService.verifyWithSign(phoneChangeDto.getSign());
+        entity.setPhoneNumber(phoneChangeDto.getNewPhone());
+        entityRepository.save(entity);
+    }
+
+    @Override
+    public void signCreate(SignCreateDto signCreateDto) throws CustomException {
+        Entity entity = extractUser();
+        if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
+            if(signCreateDto.getSign().length() != 6)
+                throw new CustomException("USERS-010", "Invalid sign length", 400);
+            entity.setSign(passwordEncoder.encode(signCreateDto.getSign()));
+            entity.setSignActivated(true);
+            entity.setSignAttempts(0);
+            entityRepository.save(entity);
+        }
+    }
+
+    private Entity extractUser() throws CustomException {
+        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
+        if(userOptional.isEmpty())
+            throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
+        return userOptional.get();
     }
 
 }
