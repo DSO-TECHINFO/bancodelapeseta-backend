@@ -53,9 +53,9 @@ public class AuthenticationController {
         authenticationService.phoneChange(phoneChangeDto);
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/create/sign")
+    @PostMapping("/create/modify/sign")
     public ResponseEntity<?> createSign(@RequestBody SignCreateDto signCreateDto) throws CustomException {
-        authenticationService.signCreate(signCreateDto);
+        authenticationService.signCreateOrModify(signCreateDto);
         return ResponseEntity.ok().build();
     }
 }

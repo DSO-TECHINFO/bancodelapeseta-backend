@@ -24,5 +24,5 @@ public interface AuthenticationService {
 
     void phoneChange(PhoneChangeDto phoneChangeDto) throws CustomException;
 
-    void signCreate(SignCreateDto signCreateDto) throws CustomException;
+    void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException;
 }
