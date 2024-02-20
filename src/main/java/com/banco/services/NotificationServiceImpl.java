@@ -2,10 +2,14 @@ package com.banco.services;
 
 
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 
 import com.amazonaws.services.simpleemail.model.*;
 
+import com.amazonaws.util.IOUtils;
 import com.banco.entities.EmailType;
 import com.banco.entities.Entity;
 import com.banco.entities.SMSType;
@@ -23,11 +27,10 @@ import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 
-import java.io.BufferedReader;
+import java.io.*;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +44,8 @@ public class NotificationServiceImpl implements NotificationService{
     private String frontendEndpoint;
     @Value("${env}")
     private String environment;
+    @Value("${aws.bucket.name}")
+    private String bucketName;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -50,6 +55,9 @@ public class NotificationServiceImpl implements NotificationService{
     private AmazonSimpleEmailService amazonSimpleEmailService;
     @Autowired
     private SnsClient snsClient;
+    @Autowired
+    private AmazonS3 s3Client;
+
 
     @Override
     public void sendEmailVerificationCode() throws CustomException {
@@ -205,92 +213,85 @@ public class NotificationServiceImpl implements NotificationService{
         entityRepository.save(entity);
     }
     private Map<String,Object> loadMailTemplate(Map<String, Object> data, EmailType emailType) throws IOException {
-        URL template;
+        String template;
         Map<String, Object> returnTemplate = new HashMap<>();
         switch (emailType){
             case ACCOUNT_DATA_MODIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/account_data_modification.html");
+                template = "templates/account_data_modification.html";
                 returnTemplate.put("subject", "Account data modified");
             }
             case CARD_CHARGE -> {
-                template = ClassLoader.getSystemResource("templates/card_charge.html");
+                template = "templates/card_charge.html";
                 returnTemplate.put("subject", "New charge in one of your cards");
             }
             case CARD_SENT -> {
-                template = ClassLoader.getSystemResource("templates/card_sent.html");
+                template = "templates/card_sent.html";
                 returnTemplate.put("subject", "Your card was sent");
             }
             case COMPLETED_LOAN -> {
-                template = ClassLoader.getSystemResource("templates/completed_loan.html");
+                template = "templates/completed_loan.html";
                 returnTemplate.put("subject", "Your loan was completed and closed");
             }
             case CREATED_NEW_BANK_ACCOUNT -> {
-                template = ClassLoader.getSystemResource("templates/created_new_bank_account.html");
+                template = "templates/created_new_bank_account.html";
                 returnTemplate.put("subject", "New bank account created");
             }
             case CREATED_NEW_CARD ->{
-                template = ClassLoader.getSystemResource("templates/created_new_card.html");
+                template = "templates/created_new_card.html";
                 returnTemplate.put("subject", "New card was created");
             }
             case CREATED_NEW_LOAN -> {
-                template = ClassLoader.getSystemResource("templates/created_new_loan.html");
+                template = "templates/created_new_loan.html";
                 returnTemplate.put("subject", "New loan was created");
             }
             case EMAIL_VERIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/email_verification.html");
+                template = "templates/email_verification.html";
                 returnTemplate.put("subject", "Email verification");
             }
             case EMAIL_MODIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/email_modification.html");
+                template = "templates/email_modification.html";
                 returnTemplate.put("subject", "Enter this code to modify your current email");
             }
             case NEW_LOGIN -> {
-                template = ClassLoader.getSystemResource("templates/new_login.html");
+                template = "templates/new_login.html";
                 returnTemplate.put("subject", "New login detected");
             }
             case PHONE_MODIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/phone_modification.html");
+                template = "templates/phone_modification.html";
                 returnTemplate.put("subject", "Your phone was modified");
             }
             case RECALCULATED_LOAN -> {
-                template = ClassLoader.getSystemResource("templates/recalculated_loan.html");
+                template = "templates/recalculated_loan.html";
                 returnTemplate.put("subject", "Your loan has been recalculated");
             }
             case SIGN_MODIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/sign_modification.html");
+                template = "templates/sign_modification.html";
                 returnTemplate.put("subject", "Enter this code to modify sign");
             }
             case TRANSACTION_VERIFICATION -> {
-                template = ClassLoader.getSystemResource("templates/transaction_verification.html");
+                template = "templates/transaction_verification.html";
                 returnTemplate.put("subject", "Enter this code to verify transaction");
             }
             case TRANSFER_RECEIVED -> {
-                template = ClassLoader.getSystemResource("templates/transfer_received.html");
+                template = "templates/transfer_received.html";
                 returnTemplate.put("subject", "Transfer was received");
             }
             case TRANSFER_SENT -> {
-                template = ClassLoader.getSystemResource("templates/transfer_sent.html");
+                template = "templates/transfer_sent.html";
                 returnTemplate.put("subject", "Transfer was sent from your account");
             }
             case UNPAID_LOAN_SUBSCRIPTION -> {
-                template = ClassLoader.getSystemResource("templates/unpaid_loan_subscription.html");
+                template = "templates/unpaid_loan_subscription.html";
                 returnTemplate.put("subject", "A loan monthly subscription was not successfully paid");
             }
             default -> {
-                template = ClassLoader.getSystemResource("templates/welcome.html");
+                template = "templates/welcome.html";
                 returnTemplate.put("subject", "Welcome to Banco De la Peseta");
             }
         }
-        StringBuilder bldr = new StringBuilder();
-        String str;
+        InputStream htmlTemplate = new ByteArrayInputStream(downloadFile(template));
+        String content = IOUtils.toString(htmlTemplate);
 
-        BufferedReader in = new BufferedReader(new FileReader(template.getFile()));
-        while((str = in.readLine())!=null)
-            bldr.append(str);
-
-        in.close();
-
-        String content = bldr.toString();
         for(String key: data.keySet()){
             Object value = data.get(key);
             String valueString;
@@ -309,7 +310,7 @@ public class NotificationServiceImpl implements NotificationService{
         if (Objects.requireNonNull(smsType) == SMSType.APPROVE) {
             map.put("text", "Here is your verification code: " + data.get("code"));
         } else {
-            map.put("text", "To verify your phone number, fill this code: " + data.get("code"));
+            map.put("text", "To verify your phone number, enter the following code: " + data.get("code"));
         }
         return map;
     }
@@ -325,5 +326,16 @@ public class NotificationServiceImpl implements NotificationService{
                 throw new CustomException("NOTIFICATIONS-007", "Message not sent", 500);
             }
 
+    }
+    
+    public byte[] downloadFile(String fileName) {
+        S3Object s3Object = s3Client.getObject(bucketName, fileName);
+        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+        try {
+            return IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -33,7 +33,7 @@ public class AWSConfig {
 
     @Bean
     public AmazonS3 s3Client() {
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, accessSecret);
+        AWSCredentials credentials = new BasicAWSCredentials(accessMailingKey, accessSecret);
         return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(region).build();
     }
