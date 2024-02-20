@@ -215,6 +215,9 @@ public class Entity implements UserDetails {
     @JsonIgnore
     @Column
     private Boolean verifyWithSign;
+    @JsonIgnore
+    @Column
+    private String userBrowser;
 
     @JsonIgnore
     @Override

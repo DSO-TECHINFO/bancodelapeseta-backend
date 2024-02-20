@@ -26,11 +26,7 @@ public class VerifyServiceImpl implements VerifyService{
 
     @Override
     public void verifyEmail(EmailPhoneVerificationDto emailPhoneVerificationDto) throws CustomException {
-            String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
-            Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
-            if(userOptional.isEmpty())
-                throw new CustomException("VERIFICATIONS-002", "User not found", 404);
-            Entity entity = userOptional.get();
+            Entity entity = extractUser();
             emailCodeCheck(emailPhoneVerificationDto.getCode(), entity);
             entity.setEmailConfirmed(true);
             entity.setEmailConfirmationCode(null);
@@ -42,11 +38,7 @@ public class VerifyServiceImpl implements VerifyService{
     @Override
     public void verifyPhone(EmailPhoneVerificationDto emailPhoneVerificationDto) throws CustomException {
         String code = emailPhoneVerificationDto.getCode();
-        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
-        if(userOptional.isEmpty())
-            throw new CustomException("VERIFICATIONS-008", "User not found", 404);
-        Entity entity = userOptional.get();
+        Entity entity = extractUser();
         phoneCodeCheck(code, entity);
         entity.setPhoneConfirmed(true);
         entity.setPhoneConfirmationCode(null);
@@ -54,6 +46,27 @@ public class VerifyServiceImpl implements VerifyService{
         entity.setPhoneConfirmationCodeExpiration(null);
         entityRepository.save(entity);
 
+    }
+
+    @Override
+    public Entity verifyWithEmailCode(String emailCode) throws CustomException {
+        Entity entity = extractUser();
+        emailCodeCheck(emailCode,entity);
+        return entity;
+    }
+
+    @Override
+    public Entity verifyWithPhoneCode(String phoneCode) throws CustomException {
+        Entity entity = extractUser();
+        phoneCodeCheck(phoneCode, entity);
+        return entity;
+    }
+
+    @Override
+    public Entity verifyWithSign(String sign) throws CustomException {
+        Entity entity = extractUser();
+        signCheck(sign,entity);
+        return entity;
     }
 
 
@@ -223,6 +236,18 @@ public class VerifyServiceImpl implements VerifyService{
             throw new CustomException("VERIFICATIONS-014", "You need to activate your sign first", 400);
         if(entity.getSignAttempts()>2)
             throw new CustomException("VERIFICATIONS-015", "Sign attempts limit reached, create a new sign", 400);
+        if(!passwordEncoder.matches(sign, entity.getSign())) {
+            entity.setSignAttempts(entity.getSignAttempts() + 1);
+            entityRepository.save(entity);
+            throw new CustomException("VERIFICATIONS-006", "Incorrect sign", 400);
+        }
+    }
+    private Entity extractUser() throws CustomException {
+        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
+        if(userOptional.isEmpty())
+            throw new CustomException("VERIFICATIONS-002", "User not found", 404);
+        return userOptional.get();
     }
 
 }
