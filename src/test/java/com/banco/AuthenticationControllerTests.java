@@ -290,7 +290,7 @@ public class AuthenticationControllerTests {
 
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/auth/create/sign").contentType(MediaType.APPLICATION_JSON)
+                        .post("/auth/create/modify/sign").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
                         .content(TestUtils.asJsonString(SignCreateDto.builder().sign("123456").verificationCode(mockedCode).build())))
                 .andExpect(status().isOk());
