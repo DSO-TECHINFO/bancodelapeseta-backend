@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 
 public interface AuthenticationService {
 
-    AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto) throws CustomException;
+    AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException;
 
     @Transactional
     void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException;
