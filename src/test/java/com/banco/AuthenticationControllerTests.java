@@ -1,13 +1,12 @@
 package com.banco;
 
-import com.banco.dtos.AuthenticationRequestDto;
+import com.banco.dtos.*;
 
-import com.banco.dtos.RegisterCompanyDto;
-import com.banco.dtos.RegisterPhysicalDto;
 import com.banco.entities.Entity;
 import com.banco.entities.EntityDebtType;
 import com.banco.entities.EntityGender;
 import com.banco.repositories.EntityRepository;
+import com.banco.security.JwtService;
 import jakarta.transaction.Transactional;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -27,6 +26,8 @@ import org.springframework.http.MediaType;
 
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -50,6 +51,10 @@ public class AuthenticationControllerTests {
     private AuthenticationManager authenticationManager;
     @MockBean
     private EntityRepository entityRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtService jwtService;
     @BeforeEach
     public void configureRepositories(){
 
@@ -59,7 +64,7 @@ public class AuthenticationControllerTests {
     public void testLoginOk() throws Exception {
 
 
-        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().build()));
+        when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().lastIpAddress("").userBrowser("").build()));
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
                 .post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(TestUtils.asJsonString(AuthenticationRequestDto.builder().username("123456789A").password("%Testing12").build())))
@@ -68,6 +73,7 @@ public class AuthenticationControllerTests {
         String content = mvcResult.getResponse().getContentAsString();
         Assertions.assertTrue(content.contains("token"));
     }
+
     @Test
     @Transactional
     public void testLoginUserIsLocked() throws Exception {
@@ -175,5 +181,119 @@ public class AuthenticationControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(TestUtils.asJsonString(registerPhysicalDto)))
                 .andExpect(status().isCreated()).andReturn();
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testChangePasswordIsOk() throws Exception {
+
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyWithSign(true)
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/auth/password/change").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                .content(TestUtils.asJsonString(PasswordChangeDto.builder().newPassword("testing").signedTransactionCode(mockedCode).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testEmailChangeIsOk() throws Exception {
+
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .emailConfirmed(true)
+                        .emailConfirmationCodeAttempts(0)
+                        .emailConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .phoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .phoneConfirmed(true)
+                        .phoneConfirmationCodeAttempts(0)
+                        .phoneConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .sign(passwordEncoder.encode(mockedCode))
+                        .signActivated(true)
+                        .signAttempts(0)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyWithSign(true)
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/change/email").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                        .content(TestUtils.asJsonString(EmailChangeDto.builder().newEmail("testing").sign(mockedCode).phoneCode(mockedCode).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testPhoneChangeIsOk() throws Exception {
+
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .emailConfirmed(true)
+                        .emailConfirmationCodeAttempts(0)
+                        .emailConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .phoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .phoneConfirmed(true)
+                        .phoneConfirmationCodeAttempts(0)
+                        .phoneConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .sign(passwordEncoder.encode(mockedCode))
+                        .signActivated(true)
+                        .signAttempts(0)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyWithSign(true)
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/change/phone").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                        .content(TestUtils.asJsonString(PhoneChangeDto.builder().newPhone("testing").sign(mockedCode).emailCode(mockedCode).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testCreateSignIsOk() throws Exception {
+
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyWithSign(true)
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/create/sign").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                        .content(TestUtils.asJsonString(SignCreateDto.builder().sign("123456").verificationCode(mockedCode).build())))
+                .andExpect(status().isOk());
+
     }
 }

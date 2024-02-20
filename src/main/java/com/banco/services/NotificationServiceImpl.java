@@ -73,7 +73,7 @@ public class NotificationServiceImpl implements NotificationService{
         user.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
         Map<String, Object> map = new HashMap<>();
-        map.put("code", code);
+        map.put("code", frontendEndpoint + "/" + code);
         map.put("subject", "Verification code");
         sendMail(user, map, EmailType.EMAIL_VERIFICATION);
     }
@@ -133,9 +133,11 @@ public class NotificationServiceImpl implements NotificationService{
     }
     //TODO
     @Override
-    public void sendNewLogin(Entity entity, String address) throws CustomException {
-
-
+    public void sendNewLogin(Entity entity, String address) throws CustomException, IOException {
+        Map<String, Object> data = new HashMap<>();
+        data.put("user.name", entity.getName());
+        data.put("new.ip", address);
+        sendMail(entity, data,EmailType.NEW_LOGIN);
     }
     //TODO
     @Override
@@ -199,10 +201,10 @@ public class NotificationServiceImpl implements NotificationService{
         }
     }
 
-    private void sendSMS(Map<String, Object> data, Entity entity, SMSType smsType) throws CustomException {
+    private void sendSMS(Map<String, Object> keysToReplace, Entity entity, SMSType smsType) throws CustomException {
         if(entity.getNextSendPhone() != null && entity.getNextSendPhone().after(new Date()))
             throw new CustomException("NOTIFICATIONS-006", "You have to wait 10 minutes to send it again", 400);
-        Map<String, Object> template = loadSMSTemplate(data, smsType);
+        Map<String, Object> template = loadSMSTemplate(keysToReplace, smsType);
         String message = (String) template.get("text");
         String phoneNumber = entity.getPhoneNumber();
 
