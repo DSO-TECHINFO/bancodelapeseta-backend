@@ -66,14 +66,14 @@ public class NotificationServiceImpl implements NotificationService{
         if(userOptional.isEmpty())
             throw new CustomException("NOTIFICATIONS-001", "User not found", 404);
         Entity user = userOptional.get();
-        String code = RandomStringUtils.randomAlphanumeric(50);
+        String code = RandomStringUtils.randomNumeric(6);
         String coded = passwordEncoder.encode(code);
-        String url = frontendEndpoint + "/verify/email/" + code;
         user.setEmailConfirmationCode(coded);
+        user.setEmailConfirmationCodeAttempts(0);
         user.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
         Map<String, Object> map = new HashMap<>();
-        map.put("url", url);
+        map.put("code", code);
         map.put("subject", "Verification code");
         sendMail(user, map, EmailType.EMAIL_VERIFICATION);
     }
@@ -91,6 +91,7 @@ public class NotificationServiceImpl implements NotificationService{
         data.put("code", code);
         sendSMS(data, user, SMSType.VERIFY);
         user.setPhoneConfirmationCode(coded);
+        user.setPhoneConfirmationCodeAttempts(0);
         user.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
     }
@@ -132,7 +133,8 @@ public class NotificationServiceImpl implements NotificationService{
     }
     //TODO
     @Override
-    public void sendNewLogin() throws CustomException {
+    public void sendNewLogin(Entity entity, String address) throws CustomException {
+
 
     }
     //TODO
@@ -175,8 +177,6 @@ public class NotificationServiceImpl implements NotificationService{
     private void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
         if(entity.getNextSendEmail() != null && entity.getNextSendEmail().after(new Date()))
             throw new CustomException("NOTIFICATIONS-003", "You have to wait 10 minutes to send it again", 400);
-        if(entity.getEmailConfirmed())
-            throw new CustomException("NOTIFICATIONS-004", "Your email is already verified", 400);
         try {
             Map<String, Object> template = loadMailTemplate(keysToReplace, emailType);
             SendEmailRequest request = new SendEmailRequest()
@@ -202,8 +202,6 @@ public class NotificationServiceImpl implements NotificationService{
     private void sendSMS(Map<String, Object> data, Entity entity, SMSType smsType) throws CustomException {
         if(entity.getNextSendPhone() != null && entity.getNextSendPhone().after(new Date()))
             throw new CustomException("NOTIFICATIONS-006", "You have to wait 10 minutes to send it again", 400);
-        if(entity.getPhoneConfirmed())
-            throw new CustomException("NOTIFICATIONS-006", "Your phone is already verified", 400);
         Map<String, Object> template = loadSMSTemplate(data, smsType);
         String message = (String) template.get("text");
         String phoneNumber = entity.getPhoneNumber();

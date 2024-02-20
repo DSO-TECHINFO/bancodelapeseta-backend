@@ -192,6 +192,31 @@ public class Entity implements UserDetails {
     @Column
     private String lastIpAddress;
     @JsonIgnore
+    @Column
+    private Integer emailConfirmationCodeAttempts;
+
+    @JsonIgnore
+    @Column
+    private Integer phoneConfirmationCodeAttempts;
+    @JsonIgnore
+    @Column
+    private Integer signAttempts;
+    @JsonIgnore
+    @Column
+    private String verifyTransactionCode;
+
+    @JsonIgnore
+    @Column
+    private Integer verifyTransactionCodeAttempts;
+
+    @JsonIgnore
+    @Column
+    private Date verifyTransactionCodeExpiration;
+    @JsonIgnore
+    @Column
+    private Boolean verifyWithSign;
+
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();

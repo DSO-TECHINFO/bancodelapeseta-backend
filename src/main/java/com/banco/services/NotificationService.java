@@ -20,7 +20,7 @@ public interface NotificationService {
     void sendCreatedNewCard() throws CustomException;
     void sendCreatedNewLoan() throws CustomException;
     void sendEmailModification() throws CustomException;
-    void sendNewLogin() throws CustomException;
+    void sendNewLogin(Entity entity,String address) throws CustomException;
     void sendRecalculatedLoan() throws CustomException;
     void sendSignModification() throws CustomException;
     void sendTransactionVerification() throws CustomException;
