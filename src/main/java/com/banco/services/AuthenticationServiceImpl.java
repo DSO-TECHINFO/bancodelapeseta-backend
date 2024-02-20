@@ -206,6 +206,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void signCreate(SignCreateDto signCreateDto) throws CustomException {
         Entity entity = extractUser();
+        if(entity.getSignActivated())
+            throw new CustomException("USERS-012", "Your sign is already created, please modify it",400);
         if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
             if(signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
