@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +43,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordUtils passwordUtils;
     private final NonNullFields nonNullFields;
+    private final NotificationService notificationService;
+
     @Override
-    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto) throws CustomException {
+    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
@@ -71,7 +74,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 entity.setLastAttempt(null);
                 entity.setLoginAttempts((short) 0);
                 entityRepository.save(entity);
-                return this.login(authenticationRequestDto);
+                return this.login(authenticationRequestDto, request);
             } else {
                 long diffInSecs = Duration.between(Instant.now(), entity.getLastAttempt().toInstant())
                         .getSeconds();
@@ -84,6 +87,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         Entity entity = entityRepository.findByTaxId(authenticationRequestDto.getUsername()).orElseThrow();
         entity.setLoginAttempts((short) 0);
+        //if(!entity.getLastIpAddress().equals(request.getHeader("X-FORWARDED-FOR")))
+          //  notificationService.sendNewLogin(entity,request.getRemoteAddr());
         entityRepository.save(entity);
         return AuthenticationResponseDto.builder().token(jwtService.generateToken(entity)).build();
     }
@@ -116,7 +121,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
         nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
-        entity.setCreatedIpAddress(request.getRemoteAddr());
+        entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.PHYSICAL);
         entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
         entityRepository.save(entity);
@@ -150,7 +155,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
         nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
-        entity.setCreatedIpAddress(request.getRemoteAddr());
+
+        entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.COMPANY);
         entity.setPassword(passwordEncoder.encode(registerCompanyDto.getPassword()));
         entityRepository.save(entity);

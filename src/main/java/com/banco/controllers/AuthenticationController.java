@@ -25,8 +25,8 @@ public class AuthenticationController {
     public final AuthenticationService authenticationService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequestDto authenticationRequestDto) throws CustomException {
-        return ResponseEntity.ok(authenticationService.login(authenticationRequestDto));
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException {
+        return ResponseEntity.ok(authenticationService.login(authenticationRequestDto, request));
     }
 
     @PostMapping("/register/physical")

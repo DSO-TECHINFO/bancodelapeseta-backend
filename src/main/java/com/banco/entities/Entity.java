@@ -202,6 +202,21 @@ public class Entity implements UserDetails {
     @Column
     private Integer signAttempts;
     @JsonIgnore
+    @Column
+    private String verifyTransactionCode;
+
+    @JsonIgnore
+    @Column
+    private Integer verifyTransactionCodeAttempts;
+
+    @JsonIgnore
+    @Column
+    private Date verifyTransactionCodeExpiration;
+    @JsonIgnore
+    @Column
+    private Boolean verifyWithSign;
+
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();
