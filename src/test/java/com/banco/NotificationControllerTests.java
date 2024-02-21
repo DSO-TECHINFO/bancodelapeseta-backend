@@ -89,6 +89,7 @@ public class NotificationControllerTests {
 
         when(amazonSimpleEmailService.sendEmail(any())).thenReturn(null);
         when(entityRepository.findByTaxId(any())).thenReturn(Optional.of(Entity.builder().emailConfirmed(false).phoneConfirmed(false).build()));
+
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/send/email/verification/code").header("Authorization", jwtService.generateToken(new Entity())))
                 .andExpect(status().isOk());

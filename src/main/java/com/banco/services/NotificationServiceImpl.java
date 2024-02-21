@@ -29,8 +29,6 @@ import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import java.io.*;
 
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService{
         user.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
         Map<String, Object> map = new HashMap<>();
-        map.put("code", frontendEndpoint + "/" + code);
+        map.put("code", code);
         map.put("subject", "Verification code");
         sendMail(user, map, EmailType.EMAIL_VERIFICATION);
     }
@@ -176,7 +174,8 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
 
-    private void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
+    @Override
+    public void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException {
         if(entity.getNextSendEmail() != null && entity.getNextSendEmail().after(new Date()))
             throw new CustomException("NOTIFICATIONS-003", "You have to wait 10 minutes to send it again", 400);
         try {
@@ -201,7 +200,8 @@ public class NotificationServiceImpl implements NotificationService{
         }
     }
 
-    private void sendSMS(Map<String, Object> keysToReplace, Entity entity, SMSType smsType) throws CustomException {
+    @Override
+    public void sendSMS(Map<String, Object> keysToReplace, Entity entity, SMSType smsType) throws CustomException {
         if(entity.getNextSendPhone() != null && entity.getNextSendPhone().after(new Date()))
             throw new CustomException("NOTIFICATIONS-006", "You have to wait 10 minutes to send it again", 400);
         Map<String, Object> template = loadSMSTemplate(keysToReplace, smsType);

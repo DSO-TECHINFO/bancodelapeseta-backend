@@ -14,6 +14,7 @@ public interface NotificationService {
     void sendEmailVerificationCode() throws CustomException;
 
     void sendPhoneVerificationCode() throws CustomException;
+
     void sendAccountDataModification() throws CustomException;
     void sendCardCharge() throws CustomException;
     void sendCompletedLoan() throws CustomException;
@@ -29,4 +30,8 @@ public interface NotificationService {
     void sendTransferSent() throws CustomException;
     void sendUnpaidLoanSubscription() throws CustomException;
     void sendWelcome() throws CustomException;
+
+    void sendMail(Entity entity, Map<String, Object> keysToReplace, EmailType emailType) throws CustomException;
+
+    void sendSMS(Map<String, Object> keysToReplace, Entity entity, SMSType smsType) throws CustomException;
 }
