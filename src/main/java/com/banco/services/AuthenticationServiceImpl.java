@@ -2,9 +2,7 @@ package com.banco.services;
 
 
 import com.banco.dtos.*;
-import com.banco.entities.Entity;
-import com.banco.entities.EntityDebtType;
-import com.banco.entities.EntityType;
+import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
 import com.banco.repositories.RoleRepository;
@@ -14,8 +12,10 @@ import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,9 +24,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.random.RandomGenerator;
 
 @AllArgsConstructor
@@ -180,8 +179,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void passwordChange(PasswordChangeDto passwordChangeDto) throws CustomException {
-        Entity user = extractUser();
+        Entity user = checkIfEntityExists(extractUser());
         if(verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(),true)){
+            if(!passwordUtils.checkPasswordValid(passwordChangeDto.getNewPassword()))
+                throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
+            if(passwordEncoder.matches(passwordChangeDto.getNewPassword(),user.getPassword()))
+                throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
             user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
             entityRepository.save(user);
         }
@@ -192,6 +195,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Entity entity = verifyService.verifyWithPhoneCode(emailChangeDto.getPhoneCode());
         verifyService.verifyWithSign(emailChangeDto.getSign());
         entity.setEmail(emailChangeDto.getNewEmail());
+        entity.setEmailConfirmed(false);
+        entity.setEmailConfirmationCode(null);
         entityRepository.save(entity);
     }
 
@@ -200,12 +205,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Entity entity = verifyService.verifyWithEmailCode(phoneChangeDto.getEmailCode());
         verifyService.verifyWithSign(phoneChangeDto.getSign());
         entity.setPhoneNumber(phoneChangeDto.getNewPhone());
+        entity.setPhoneConfirmed(false);
+        entity.setPhoneConfirmationCode(null);
         entityRepository.save(entity);
     }
 
     @Override
     public void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException {
-        Entity entity = extractUser();
+        Entity entity = checkIfEntityExists(extractUser());
         if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
             if(signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
@@ -216,12 +223,100 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    private Entity extractUser() throws CustomException {
+    @Override
+    public void recoveryPassword(RecoveryPasswordDto recoveryPasswordDto) throws CustomException {
+        Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordDto.getTaxId()));
+        if(!entity.getPhoneConfirmed())
+            throw new CustomException("USERS-030", "Phone needs to be verified", 400);
+        if(!entity.getEmailConfirmed())
+            throw new CustomException("USERS-031", "Email needs to be verified", 400);
+        switch (recoveryPasswordDto.getType()) {
+            case PHYSICAL -> {
+                if (recoveryPasswordDto.getPhone().equals(entity.getPhoneNumber())
+                        && recoveryPasswordDto.getBirthday().equals(entity.getBirthday())
+                        && recoveryPasswordDto.getNationalIdExpiration().equals(entity.getNationalIdExpiration())
+                        && recoveryPasswordDto.getType() == entity.getType()){
+                    generateCodesAndSend(entity);
+                    return;
+                }
+                throw new CustomException("USERS-020", "Data is invalid", 400);
+            }
+        case COMPANY ->{
+            if (recoveryPasswordDto.getPhone().equals(entity.getPhoneNumber())
+                    && recoveryPasswordDto.getSettingUpDate().equals(entity.getSettingUpDate())
+                    && recoveryPasswordDto.getType() == entity.getType()){
+                generateCodesAndSend(entity);
+                return;
+            }
+            throw new CustomException("USERS-020", "Data is invalid", 400);
+        }
+        }
+    }
+
+    @Override
+    public void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException {
+        Entity user = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordChangeDto.getTaxId()));
+
+        verifyService.verifyPasswordRecoveryCode(recoveryPasswordChangeDto.getRecoveryCode(), user);
+        if(!passwordUtils.checkPasswordValid(recoveryPasswordChangeDto.getNewPassword()))
+            throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
+        if(passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(),user.getPassword()))
+            throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
+        user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
+        entityRepository.save(user);
+
+    }
+
+    @Override
+    public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
+        Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordCodeInputDto.getTaxId()));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(entity, null, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        verifyService.verifyWithSign(recoveryPasswordCodeInputDto.getSign());
+        verifyService.verifyWithEmailCode(recoveryPasswordCodeInputDto.getEmailCode());
+        verifyService.verifyWithPhoneCode(recoveryPasswordCodeInputDto.getPhoneCode());
+        String randomCode = RandomStringUtils.randomAlphanumeric(20);
+        entity.setPasswordChangeCode(passwordEncoder.encode(randomCode));
+        entity.setPasswordChangeCodeAttempts(0);
+        entity.setPasswordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+        entityRepository.save(entity);
+        RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode);
+
+    }
+
+    private void generateCodesAndSend(Entity entity) throws CustomException {
+        // SET EMAIL AND PHONE CODES HERE AND SEND THEM
+        String code = RandomStringUtils.randomNumeric(6);
+        String coded = passwordEncoder.encode(code);
+        entity.setEmailConfirmationCode(coded);
+        entity.setEmailConfirmationCodeAttempts(0);
+        entity.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+        Map<String, Object> data = new HashMap<>();
+        data.put("code", code);
+        data.put("subject", "Password change code");
+        notificationService.sendMail(entity, data, EmailType.EMAIL_VERIFICATION);
+        code = RandomStringUtils.randomNumeric(6);
+        coded = passwordEncoder.encode(code);
+        data = new HashMap<>();
+        data.put("code", code);
+        entity.setPhoneConfirmationCode(coded);
+        entity.setPhoneConfirmationCodeAttempts(0);
+        entity.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+        notificationService.sendSMS(data, entity, SMSType.VERIFY);
+    }
+
+    private Optional<Entity> extractUser() throws CustomException {
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
+        return entityRepository.findByTaxId(userTaxId);
+    }
+
+    private static Entity checkIfEntityExists(Optional<Entity> userOptional) throws CustomException {
         if(userOptional.isEmpty())
             throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
         return userOptional.get();
     }
+
 
 }

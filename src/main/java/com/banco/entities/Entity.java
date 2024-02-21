@@ -159,10 +159,6 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private String transactionApproveCode;
-
-    @JsonIgnore
-    @Column
     private Short loginAttempts;
 
     @JsonIgnore
@@ -218,6 +214,12 @@ public class Entity implements UserDetails {
     @JsonIgnore
     @Column
     private String userBrowser;
+    @JsonIgnore
+    @Column
+    private Integer passwordChangeCodeAttempts;
+    @JsonIgnore
+    @Column
+    private Date passwordChangeCodeExpiration;
 
     @JsonIgnore
     @Override
@@ -284,9 +286,7 @@ public class Entity implements UserDetails {
         if (!Objects.equals(signActivated, entity.signActivated)) return false;
         if (!Objects.equals(emailChangeCode, entity.emailChangeCode))
             return false;
-        if (!Objects.equals(passwordChangeCode, entity.passwordChangeCode))
-            return false;
-        return Objects.equals(transactionApproveCode, entity.transactionApproveCode);
+        return Objects.equals(passwordChangeCode, entity.passwordChangeCode);
     }
 
     @Override
@@ -308,7 +308,6 @@ public class Entity implements UserDetails {
         result = 31 * result + (signActivated != null ? signActivated.hashCode() : 0);
         result = 31 * result + (emailChangeCode != null ? emailChangeCode.hashCode() : 0);
         result = 31 * result + (passwordChangeCode != null ? passwordChangeCode.hashCode() : 0);
-        result = 31 * result + (transactionApproveCode != null ? transactionApproveCode.hashCode() : 0);
         result = 31 * result + (debtType != null ? debtType.hashCode() : 0);
         return result;
     }

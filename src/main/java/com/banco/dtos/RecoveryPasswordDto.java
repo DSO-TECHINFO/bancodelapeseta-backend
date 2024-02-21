@@ -14,16 +14,11 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecoveryPasswordDto {
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private EntityType type;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String nif;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String taxId;
     private Date nationalIdExpiration;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String phone;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Date birthdate;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Date birthday;
     private Date settingUpDate;
 }

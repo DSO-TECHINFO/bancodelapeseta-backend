@@ -6,7 +6,6 @@ import com.banco.dtos.VerificationCodeReturnDto;
 import com.banco.entities.Entity;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
-import com.banco.security.JwtService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,10 +62,9 @@ public class VerifyServiceImpl implements VerifyService{
     }
 
     @Override
-    public Entity verifyWithSign(String sign) throws CustomException {
+    public void verifyWithSign(String sign) throws CustomException {
         Entity entity = extractUser();
         signCheck(sign,entity);
-        return entity;
     }
 
 
@@ -173,12 +171,27 @@ public class VerifyServiceImpl implements VerifyService{
         }
     }
 
+    @Override
+    public void verifyPasswordRecoveryCode(String code, Entity entity) throws CustomException {
+        if (code == null || code.isEmpty())
+            throw new CustomException("VERIFICATIONS-031", "Code cannot be blank", 400);
+        if(entity.getPasswordChangeCodeExpiration().before(new Date()))
+            throw new CustomException("VERIFICATIONS-031", "Code expired", 400);
+        if(!passwordEncoder.matches(code, entity.getPasswordChangeCode())) {
+            entity.setPasswordChangeCodeAttempts(entity.getPasswordChangeCodeAttempts() + 1);
+            entityRepository.save(entity);
+            throw new CustomException("VERIFICATIONS-031", "Wrong code", 400);
+        }
+    }
+
     public boolean verifyTransactionCode(String transactionCode, Boolean doesTransactionNeedsToBeSigned) throws CustomException {
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
         if(userOptional.isEmpty())
             throw new CustomException("VERIFICATIONS-014", "User not found", 404);
         Entity entity = userOptional.get();
+        if(!entity.getEmailConfirmed()&& !entity.getPhoneConfirmed())
+            throw new CustomException("VERIFICATIONS-030", "You need to confirm your email and password first", 400);
         if(doesTransactionNeedsToBeSigned && !entity.getVerifyWithSign())
             throw new CustomException("VERIFICATIONS-022", "Transaction requires to be signed", 400);
         if(entity.getVerifyTransactionCodeAttempts()>2)

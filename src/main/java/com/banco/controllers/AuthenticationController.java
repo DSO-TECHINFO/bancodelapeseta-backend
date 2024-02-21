@@ -43,6 +43,22 @@ public class AuthenticationController {
         authenticationService.passwordChange(passwordChangeDto);
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/recovery/password")
+    public ResponseEntity<?> recoveryPassword(@RequestBody RecoveryPasswordDto recoveryPasswordDto) throws CustomException {
+        authenticationService.recoveryPassword(recoveryPasswordDto);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/recovery/password/check/code")
+    public ResponseEntity<?> recoveryPasswordCheckCode(@RequestBody RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
+        authenticationService.recoveryPasswordCheckCode(recoveryPasswordCodeInputDto);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/recovery/password/change")
+    public ResponseEntity<?> recoveryPasswordChange(@RequestBody RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException {
+        authenticationService.recoveryPasswordChange(recoveryPasswordChangeDto);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/change/email")
     public ResponseEntity<?> emailChange(@RequestBody EmailChangeDto emailChangeDto) throws CustomException {
         authenticationService.emailChange(emailChangeDto);
