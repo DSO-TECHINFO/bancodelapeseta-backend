@@ -152,9 +152,11 @@ public class VerificationControllerTest {
         String mockedCode = "CODETEST";
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
                         .verifyTransactionCode(passwordEncoder.encode(mockedCode))
-                                .verifyTransactionCodeAttempts(0)
-                                .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
                         .build()));
 
         Assertions.assertTrue(verifyService.verifyTransactionCode(mockedCode, false));
@@ -168,6 +170,8 @@ public class VerificationControllerTest {
         String mockedCode = "CODETEST";
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
                         .verifyTransactionCode(passwordEncoder.encode(mockedCode))
                         .verifyTransactionCodeAttempts(0)
                         .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
@@ -185,6 +189,8 @@ public class VerificationControllerTest {
         String mockedCode = "CODETEST";
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
                         .verifyTransactionCode(passwordEncoder.encode(mockedCode))
                         .verifyTransactionCodeAttempts(0)
                         .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
