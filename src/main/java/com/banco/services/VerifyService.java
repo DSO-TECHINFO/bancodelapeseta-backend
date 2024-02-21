@@ -13,9 +13,9 @@ public interface VerifyService {
 
     Entity verifyWithEmailCode(String emailCode) throws CustomException;
     Entity verifyWithPhoneCode(String phoneCode) throws CustomException;
-    Entity verifyWithSign(String sign) throws CustomException;
+    void verifyWithSign(String sign) throws CustomException;
     VerificationCodeReturnDto verifyTransaction(TransactionVerificationDto transactionVerificationDto) throws CustomException;
     VerificationCodeReturnDto verifyTransactionWithSign(TransactionVerificationDto transactionVerificationDto) throws CustomException;
-
+    void verifyPasswordRecoveryCode(String code, Entity entity) throws CustomException;
     boolean verifyTransactionCode(String transactionCode, Boolean doesTransactionNeedsToBeSigned) throws CustomException;
 }

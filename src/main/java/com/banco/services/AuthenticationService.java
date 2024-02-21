@@ -25,4 +25,10 @@ public interface AuthenticationService {
     void phoneChange(PhoneChangeDto phoneChangeDto) throws CustomException;
 
     void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException;
+
+    void recoveryPassword(RecoveryPasswordDto recoveryPasswordDto) throws CustomException;
+
+    void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException;
+
+    void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException;
 }

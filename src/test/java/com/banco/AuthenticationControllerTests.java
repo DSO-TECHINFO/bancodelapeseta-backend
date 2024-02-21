@@ -1,10 +1,15 @@
 package com.banco;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.util.StringInputStream;
 import com.banco.dtos.*;
 
 import com.banco.entities.Entity;
 import com.banco.entities.EntityDebtType;
 import com.banco.entities.EntityGender;
+import com.banco.entities.EntityType;
 import com.banco.repositories.EntityRepository;
 import com.banco.security.JwtService;
 import jakarta.transaction.Transactional;
@@ -22,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import org.springframework.security.authentication.*;
@@ -31,7 +37,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +66,12 @@ public class AuthenticationControllerTests {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
+    @MockBean
+    private AmazonSimpleEmailService amazonSimpleEmailService;
+    @MockBean
+    private AmazonS3 s3Client;
+    @MockBean
+    private SnsClient snsClient;
     @BeforeEach
     public void configureRepositories(){
 
@@ -202,8 +219,115 @@ public class AuthenticationControllerTests {
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/auth/password/change").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
-                .content(TestUtils.asJsonString(PasswordChangeDto.builder().newPassword("testing").signedTransactionCode(mockedCode).build())))
+                .content(TestUtils.asJsonString(PasswordChangeDto.builder().newPassword("%Testing12").signedTransactionCode(mockedCode).build())))
                 .andExpect(status().isOk());
+
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testChangePasswordDoesNotFitPasswordRequirements() throws Exception {
+
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyWithSign(true)
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        MvcResult resultMvc = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/password/change").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                        .content(TestUtils.asJsonString(PasswordChangeDto.builder().newPassword("1").signedTransactionCode(mockedCode).build())))
+                .andExpect(status().isBadRequest()).andReturn();
+        Assertions.assertTrue(resultMvc.getResponse().getContentAsString().contains("password requirements"));
+    }
+    @Test
+    @Transactional
+    public void testRecoveryPasswordIsOk() throws Exception {
+
+        String property = "header<body>body</body>trailer";
+        InputStream testInputStream = new StringInputStream(property);
+        S3Object s3Object = new S3Object();
+        s3Object.setObjectContent(testInputStream);
+        when(s3Client.getObject((String) any(),any())).thenReturn(s3Object);
+        when(amazonSimpleEmailService.sendEmail(any())).thenReturn(null);
+
+        SdkHttpResponse response = SdkHttpResponse.builder().statusCode(HttpStatus.OK.value()).build();
+        when(snsClient.publish((PublishRequest) any())).thenReturn((PublishResponse) PublishResponse.builder().sdkHttpResponse(response).build());
+
+        Date date = new Date();
+        String taxId = "123456789A";
+        String phone = "123123123";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .taxId(taxId)
+                        .phoneNumber(phone)
+                        .birthday(date)
+                        .nationalIdExpiration(date)
+                        .type(EntityType.PHYSICAL)
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/recovery/password").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(RecoveryPasswordDto.builder().taxId(taxId).type(EntityType.PHYSICAL).nationalIdExpiration(date).phone(phone).birthday(date).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @Transactional
+    public void testRecoveryChangePasswordIsOk() throws Exception {
+
+        String mockedCode = "CODETEST";
+        String taxId = "123456789A";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .taxId(taxId)
+                        .password("ABCD")
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .passwordChangeCode(passwordEncoder.encode(mockedCode))
+                        .passwordChangeCodeAttempts(0)
+                        .passwordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/recovery/password/change").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(RecoveryPasswordChangeDto.builder().newPassword("%Testing12").taxId(taxId).recoveryCode(mockedCode).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @Transactional
+    public void testRecoveryChangePasswordVerifyCodeIsWrongBadRequest() throws Exception {
+
+        String mockedCode = "CODETEST";
+        String taxId = "123456789A";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .taxId(taxId)
+                        .password("ABCD")
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .passwordChangeCode(passwordEncoder.encode(mockedCode))
+                        .passwordChangeCodeAttempts(0)
+                        .passwordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/recovery/password/change").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(RecoveryPasswordChangeDto.builder().newPassword("%Testing12").taxId(taxId).recoveryCode("123").build())))
+                .andExpect(status().isBadRequest());
 
     }
     @Test
