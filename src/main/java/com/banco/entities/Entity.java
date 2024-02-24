@@ -220,6 +220,10 @@ public class Entity implements UserDetails {
     @JsonIgnore
     @Column
     private Date passwordChangeCodeExpiration;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ManyToMany
+    @JoinTable(name = "entity_contract", joinColumns = @JoinColumn(name = "entity_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contract_id", referencedColumnName = "id"))
+    private List<Contract> contracts;
 
     @JsonIgnore
     @Override
