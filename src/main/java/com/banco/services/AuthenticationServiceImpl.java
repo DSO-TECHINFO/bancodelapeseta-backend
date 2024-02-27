@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.tomcat.util.codec.binary.StringUtils;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +25,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.random.RandomGenerator;
 
 @AllArgsConstructor
 @Service
@@ -263,12 +261,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(),user.getPassword()))
             throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
         user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
+        user.setPasswordChangeCode(null);
+        user.setPasswordChangeCodeExpiration(new Date());
         entityRepository.save(user);
 
     }
 
     @Override
-    public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
+    public RecoveryPasswordCodeReturnDto recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
         Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordCodeInputDto.getTaxId()));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(entity, null, null);
@@ -282,7 +282,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPasswordChangeCodeAttempts(0);
         entity.setPasswordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(entity);
-        RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode);
+        return RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode).build();
 
     }
 
