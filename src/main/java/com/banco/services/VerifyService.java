@@ -1,6 +1,7 @@
 package com.banco.services;
 
 import com.banco.dtos.EmailPhoneVerificationDto;
+import com.banco.dtos.SignTransferRequestDto;
 import com.banco.dtos.TransactionVerificationDto;
 import com.banco.dtos.VerificationCodeReturnDto;
 import com.banco.entities.Entity;
@@ -18,4 +19,6 @@ public interface VerifyService {
     VerificationCodeReturnDto verifyTransactionWithSign(TransactionVerificationDto transactionVerificationDto) throws CustomException;
     void verifyPasswordRecoveryCode(String code, Entity entity) throws CustomException;
     boolean verifyTransactionCode(String transactionCode, Boolean doesTransactionNeedsToBeSigned) throws CustomException;
+
+    boolean verifyTransferWithSign(SignTransferRequestDto signTransferRequestDto) throws CustomException;
 }

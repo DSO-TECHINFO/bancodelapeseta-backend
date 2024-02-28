@@ -264,7 +264,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
         user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
         entityRepository.save(user);
-
     }
 
     @Override

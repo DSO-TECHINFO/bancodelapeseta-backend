@@ -1,7 +1,9 @@
 package com.banco.controllers;
 
 import com.banco.dtos.EmailPhoneVerificationDto;
+import com.banco.dtos.SignTransferRequestDto;
 import com.banco.dtos.TransactionVerificationDto;
+import com.banco.entities.Transfer;
 import com.banco.exceptions.CustomException;
 import com.banco.services.VerifyService;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,11 @@ public class VerifyController {
     @PostMapping("/transaction/signed")
     public ResponseEntity<?> verifyTransactionWithSign(@RequestBody TransactionVerificationDto transactionVerificationDto) throws CustomException {
         return ResponseEntity.ok(verifyService.verifyTransactionWithSign(transactionVerificationDto));
+    }
+
+    @PostMapping("/transfer/sign")
+    public ResponseEntity<?> verifyTranferWithSign(@RequestBody SignTransferRequestDto signTransferRequestDto) throws CustomException {
+        return ResponseEntity.ok(verifyService.verifyTransferWithSign(signTransferRequestDto));
     }
 
 }

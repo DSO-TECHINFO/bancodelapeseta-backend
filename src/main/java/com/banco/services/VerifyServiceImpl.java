@@ -1,11 +1,15 @@
 package com.banco.services;
 
 import com.banco.dtos.EmailPhoneVerificationDto;
+import com.banco.dtos.SignTransferRequestDto;
 import com.banco.dtos.TransactionVerificationDto;
 import com.banco.dtos.VerificationCodeReturnDto;
 import com.banco.entities.Entity;
+import com.banco.entities.Transfer;
+import com.banco.entities.TransferStatus;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
+import com.banco.repositories.TransferRepository;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +26,7 @@ public class VerifyServiceImpl implements VerifyService{
 
     private final EntityRepository entityRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TransferRepository transferRepository;
 
     @Override
     public void verifyEmail(EmailPhoneVerificationDto emailPhoneVerificationDto) throws CustomException {
@@ -209,6 +214,28 @@ public class VerifyServiceImpl implements VerifyService{
         entity.setVerifyWithSign(false);
         return true;
     }
+
+    @Override
+    public boolean verifyTransferWithSign(SignTransferRequestDto signTransferRequestDto) throws CustomException {
+        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
+        Optional<Transfer> transfer = transferRepository.findById(signTransferRequestDto.getTransferId());
+        if(signTransferRequestDto.getSign().isEmpty()){
+            throw new CustomException("VERIFICATION-032","The sign is empty",400);
+        }
+        if(!transfer.get().isPending()){
+            throw new CustomException("VERIFICATION-032","The transfer is not pending, please check the status",400);
+        }
+        if(transfer.get().isPending()){
+            if (signTransferRequestDto.getSign().equals(userOptional.get().getSign())){
+                transfer.get().setStatus(TransferStatus.COMPLETED);
+            }else {
+                throw new CustomException("VERIFICATION-032","The sign is not correct",400);
+            }
+        }
+        return true;
+    }
+
     void emailCodeCheck(String emailCode, Entity entity) throws CustomException{
 
         if (emailCode.isEmpty())
