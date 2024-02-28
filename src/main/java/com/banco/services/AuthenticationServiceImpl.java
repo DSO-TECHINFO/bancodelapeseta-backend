@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.tomcat.util.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -216,6 +216,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
             if(signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
+            if(!StringUtils.isNumeric(signCreateDto.getSign()))
+                throw new CustomException("USERS-050", "Sign must be numeric combintaion", 400);
             entity.setSign(passwordEncoder.encode(signCreateDto.getSign()));
             entity.setSignActivated(true);
             entity.setSignAttempts(0);
