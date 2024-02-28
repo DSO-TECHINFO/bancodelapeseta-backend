@@ -1,0 +1,14 @@
+package com.banco.entities;
+
+public enum LoanType {
+
+
+    MORTGAGE, // HIPOTECA
+
+    PERSONAL, // PRESTAMO PERSONAL
+
+    CREDIT, //FINACIACION PARA LA TARJETA DE CREDITO
+
+    FINANCE //FINANCIACION PARA LA COMPRA DE UN COCHE
+
+}
