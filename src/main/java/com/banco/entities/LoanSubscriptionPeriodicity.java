@@ -1,4 +1,10 @@
 package com.banco.entities;
 
-public class LoanSubscriptionPeriodicity {
+public enum LoanSubscriptionPeriodicity {
+    ANNUAL,
+    BIANNUAL,
+    QUARTERLY,
+    MONTHLY,
+    WEEKLY,
+    DAILY
 }
