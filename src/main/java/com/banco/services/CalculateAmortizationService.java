@@ -4,6 +4,7 @@ import com.banco.entities.LoanPayment;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,23 +12,33 @@ import java.util.List;
 public class CalculateAmortizationService {
 
 
-    public List<LoanPayment> calculateAmortizationSchedule(Loan loan) {
+    public List<LoanPayment> calculateAmortization(Loan loan) {
         List<LoanPayment> payments = new ArrayList<>();
 
         BigDecimal remainingBalance = loan.getAmount();
-        BigDecimal monthlyInterestRate = loan.getInterestRate().divide(BigDecimal.valueOf(12), 7);
-        int totalPayments = loan.getLoanMonthTerms();
+        BigDecimal monthlyInterestRate = loan.getInterestRate().divide(BigDecimal.valueOf(12), 7, RoundingMode.HALF_UP);
+        int totalPayments = loan.getLoanNumberPayments();
 
         BigDecimal monthlyPayment = calculateMonthlyPayment(loan.getAmount(), monthlyInterestRate, totalPayments);
+        for (int i = 0; i < totalPayments; i++) {
+            BigDecimal interestPayment = remainingBalance.multiply(monthlyInterestRate);
+            BigDecimal principalPayment = monthlyPayment.subtract(interestPayment);
+            remainingBalance = remainingBalance.subtract(principalPayment);
 
-
+            LoanPayment payment = new LoanPayment();
+            payment.setPaymentNumber(i + 1);
+            payment.setPaymentAmount(monthlyPayment);
+            payment.setInterestPaid(interestPayment);
+            payment.setPrincipalPaid(principalPayment);
+            payment.setRemainingBalance(remainingBalance);
+            payments.add(payment);
+        }
 
         return payments;
     }
 
     private BigDecimal calculateMonthlyPayment(BigDecimal loanAmount, BigDecimal monthlyInterestRate, int totalPayments) {
-        BigDecimal monthlyPayment = loanAmount.multiply(monthlyInterestRate)
-                .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.add(monthlyInterestRate).pow(-totalPayments)), 2);
-        return monthlyPayment;
+        return loanAmount.multiply(monthlyInterestRate)
+                .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.add(monthlyInterestRate).pow(-totalPayments)), 2, RoundingMode.HALF_UP);
     }
 }

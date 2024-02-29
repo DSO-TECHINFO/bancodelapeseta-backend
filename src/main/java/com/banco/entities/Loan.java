@@ -1,9 +1,25 @@
 package com.banco.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
+@Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Loan {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
     private BigDecimal amount; // 10,2
@@ -12,7 +28,8 @@ public class Loan {
 
     private LoanSubscriptionPeriodicity loanSubscriptionPeriodicity;
 
-    private int loanMonthTerms;
+    private int loanNumberPayments;
+
 
     public String getId() {
         return id;
@@ -46,11 +63,12 @@ public class Loan {
         this.loanSubscriptionPeriodicity = loanSubscriptionPeriodicity;
     }
 
-    public int getLoanMonthTerms() {
-        return loanMonthTerms;
+
+    public int getLoanNumberPayments() {
+        return loanNumberPayments;
     }
 
-    public void setLoanMonthTerms(int loanMonthTerms){
-        this.loanMonthTerms = loanMonthTerms;
+    public void setLoanNumberPayments(int loanNumberPayments) {
+        this.loanNumberPayments = loanNumberPayments;
     }
 }
