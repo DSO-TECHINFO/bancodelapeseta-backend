@@ -1,7 +1,7 @@
 package com.banco.services;
 
-import com.banco.entities.Contract;
 import com.banco.entities.ContractType;
+import com.banco.entities.EntityContract;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
 import com.banco.utils.EntityUtils;
@@ -17,10 +17,10 @@ public class AccountServiceImpl implements AccountService{
     private EntityRepository entityRepository;
     private EntityUtils entityUtils;
     @Override
-    public List<Contract> getAccounts() throws CustomException {
+    public List<EntityContract> getAccounts() throws CustomException {
 
         return entityRepository.findByTaxId(entityUtils.checkIfEntityExists(entityUtils.extractUser()).getTaxId()).orElseThrow()
-                .getContracts().stream().filter(contract -> contract.getType() == ContractType.ACCOUNT).collect(Collectors.toList());
+                .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT).collect(Collectors.toList());
 
     }
 }
