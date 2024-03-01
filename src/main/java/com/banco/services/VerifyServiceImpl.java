@@ -96,13 +96,13 @@ public class VerifyServiceImpl implements VerifyService{
         else {
 
             final String code = RandomStringUtils.randomAlphanumeric(50);
-            VerificationCodeReturnDto verificationCodeReturnDto = VerificationCodeReturnDto.builder().verificationCode(code).build();
+
             entity.setVerifyTransactionCode(passwordEncoder.encode(code));
             entity.setVerifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entity.setVerifyTransactionCodeAttempts(0);
             entity.setVerifyWithSign(false);
             entityRepository.save(entity);
-            return verificationCodeReturnDto;
+            return VerificationCodeReturnDto.builder().verificationCode(code).expirationDate(entity.getVerifyTransactionCodeExpiration()).build();
         }
 
     }
@@ -155,13 +155,13 @@ public class VerifyServiceImpl implements VerifyService{
         else {
 
             final String code = RandomStringUtils.randomAlphanumeric(50);
-            VerificationCodeReturnDto verificationCodeReturnDto = VerificationCodeReturnDto.builder().verificationCode(code).build();
             entity.setVerifyTransactionCode(passwordEncoder.encode(code));
             entity.setVerifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entity.setVerifyTransactionCodeAttempts(0);
             entity.setVerifyWithSign(true);
             entityRepository.save(entity);
-            return verificationCodeReturnDto;
+
+            return VerificationCodeReturnDto.builder().verificationCode(code).expirationDate(entity.getVerifyTransactionCodeExpiration()).build();
         }
     }
 
