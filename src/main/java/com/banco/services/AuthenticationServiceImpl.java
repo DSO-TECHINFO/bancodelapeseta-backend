@@ -47,7 +47,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
             String taxId = authenticationRequestDto.getUsername();
-            Entity finalEntity = entityUtils.getEntityInfo(taxId);
+            Entity finalEntity = entityUtils.getEntityInfo(taxId, new CustomException("USERS-001", "Wrong username or password", 401));
             if (finalEntity.getLoginAttempts() == null)
                 finalEntity.setLoginAttempts((short) 0);
             short attempts = finalEntity.getLoginAttempts();
@@ -81,7 +81,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-005", "Confirm your email and phone to continue, you can resend email and phone code.", 401);
         }
         String taxId = authenticationRequestDto.getUsername();
-        Entity entity = entityUtils.getEntityInfo(taxId);
+        // Recover entity, no need to create a custom exception, it exists in ddbb
+        Entity entity = entityUtils.getEntityInfo(taxId, new CustomException("", "", 0));
         entity.setLoginAttempts((short) 0);
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         String userAgent = request.getHeader("User-Agent");
@@ -162,7 +163,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 && registerCompanyDto.getDebtType() != EntityDebtType.MICROCOMPANY
                 && registerCompanyDto.getDebtType() != EntityDebtType.STARTUP
                 && registerCompanyDto.getDebtType() != EntityDebtType.COMPANY ){
-            throw new CustomException("USERS-010", "Company canoot have physical person debt type", 400);
+            throw new CustomException("USERS-010", "Company cannot have physical person debt type", 400);
         }
         if(registerCompanyDto.getSettingUpDate().after(new Date()))
             throw new CustomException("USERS-011", "Company set up date cannot be a date after today", 400);

@@ -22,6 +22,8 @@ public class VerifyServiceImpl implements VerifyService{
     private final EntityUtils entityUtils;
     private final PasswordEncoder passwordEncoder;
 
+    private final CustomException USER_NOT_FOUND_EXCEPTION = new CustomException("VERIFICATIONS-014", "User not found", 404);
+
     @Override
     public void verifyEmail(EmailPhoneVerificationDto emailPhoneVerificationDto) throws CustomException {
         Entity entity = entityUtils.getCurrentUserInfo();
@@ -71,7 +73,7 @@ public class VerifyServiceImpl implements VerifyService{
     public VerificationCodeReturnDto verifyTransaction(TransactionVerificationDto transactionVerificationDto) throws CustomException {
         String emailCode = transactionVerificationDto.getEmailCode();
         String phoneCode = transactionVerificationDto.getPhoneCode();
-        Entity entity = entityUtils.getCurrentUserInfo();
+        Entity entity = entityUtils.getCurrentUserInfo(USER_NOT_FOUND_EXCEPTION);
         emailCodeCheck(emailCode, entity);
         phoneCodeCheck(phoneCode, entity);
         if(!passwordEncoder.matches(phoneCode, entity.getPhoneConfirmationCode()) || !passwordEncoder.matches(emailCode, entity.getEmailConfirmationCode())) {
@@ -113,7 +115,7 @@ public class VerifyServiceImpl implements VerifyService{
         String emailCode = transactionVerificationDto.getEmailCode();
         String phoneCode = transactionVerificationDto.getPhoneCode();
         String sign = transactionVerificationDto.getSign();
-        Entity entity = entityUtils.getCurrentUserInfo();
+        Entity entity = entityUtils.getCurrentUserInfo(USER_NOT_FOUND_EXCEPTION);
         emailCodeCheck(emailCode, entity);
         phoneCodeCheck(phoneCode, entity);
         signCheck(sign,entity);
@@ -176,7 +178,7 @@ public class VerifyServiceImpl implements VerifyService{
     }
 
     public boolean verifyTransactionCode(String transactionCode, Boolean doesTransactionNeedsToBeSigned) throws CustomException {
-        Entity entity = entityUtils.getCurrentUserInfo();
+        Entity entity = entityUtils.getCurrentUserInfo(USER_NOT_FOUND_EXCEPTION);
         if(!entity.getEmailConfirmed()&& !entity.getPhoneConfirmed())
             throw new CustomException("VERIFICATIONS-030", "You need to confirm your email and password first", 400);
         if(doesTransactionNeedsToBeSigned && !entity.getVerifyWithSign())
