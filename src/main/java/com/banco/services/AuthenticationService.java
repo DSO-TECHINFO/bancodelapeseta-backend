@@ -30,5 +30,5 @@ public interface AuthenticationService {
 
     void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException;
 
-    void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException;
+    RecoveryPasswordCodeReturnDto recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException;
 }
