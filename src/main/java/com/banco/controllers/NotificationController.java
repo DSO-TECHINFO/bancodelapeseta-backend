@@ -25,6 +25,7 @@ public class NotificationController {
     @GetMapping("/phone/verification/code")
     public  ResponseEntity<?> sendPhoneVerificationCode() throws CustomException{
         notificationService.sendPhoneVerificationCode();
+
         return ResponseEntity.ok().build();
     }
 }

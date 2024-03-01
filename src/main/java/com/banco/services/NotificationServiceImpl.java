@@ -69,11 +69,12 @@ public class NotificationServiceImpl implements NotificationService{
         user.setEmailConfirmationCode(coded);
         user.setEmailConfirmationCodeAttempts(0);
         user.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-        entityRepository.save(user);
         Map<String, Object> map = new HashMap<>();
         map.put("code", code);
         map.put("subject", "Verification code");
         sendMail(user, map, EmailType.EMAIL_VERIFICATION);
+        user.setNextSendEmail(new Date( System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
+        entityRepository.save(user);
     }
 
     @Override
@@ -191,7 +192,6 @@ public class NotificationServiceImpl implements NotificationService{
                                     .withCharset("UTF-8").withData((String) template.get("subject"))))
                     .withSource(sourceMail);
             amazonSimpleEmailService.sendEmail(request);
-            entity.setNextSendEmail(new Date( System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entityRepository.save(entity);
         } catch (Exception ex) {
             if(environment.equals("local")||environment.equals("dev"))

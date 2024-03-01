@@ -28,9 +28,6 @@ public class VerifyServiceImpl implements VerifyService{
             Entity entity = extractUser();
             emailCodeCheck(emailPhoneVerificationDto.getCode(), entity);
             entity.setEmailConfirmed(true);
-            entity.setEmailConfirmationCode(null);
-            entity.setEmailConfirmationCodeAttempts(0);
-            entity.setEmailConfirmationCodeExpiration(null);
             entityRepository.save(entity);
 
     }
@@ -40,9 +37,6 @@ public class VerifyServiceImpl implements VerifyService{
         Entity entity = extractUser();
         phoneCodeCheck(code, entity);
         entity.setPhoneConfirmed(true);
-        entity.setPhoneConfirmationCode(null);
-        entity.setPhoneConfirmationCodeAttempts(0);
-        entity.setPhoneConfirmationCodeExpiration(null);
         entityRepository.save(entity);
 
     }
