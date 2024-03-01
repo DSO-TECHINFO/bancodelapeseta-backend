@@ -34,7 +34,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(AbstractHttpConfigurer::disable) //TODO
+                .cors(AbstractHttpConfigurer::disable) //TODO ACTIVATE AGAIN
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests.requestMatchers(Strings.toStringArray(NO_AUTH_ENDPOINTS)).permitAll();
