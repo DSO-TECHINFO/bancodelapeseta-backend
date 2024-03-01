@@ -19,7 +19,7 @@ public class CardController {
 
     private final CardService cardService;
 
-    @PostMapping("/access/sensitiveinfo/")
+    @PostMapping("/access/sensitiveinfo")
     public ResponseEntity<?> accessSensitiveInfo(@RequestBody TransactionVerificationDto transactionVerificationDto)
             throws CustomException {
         cardService.accessSensitiveInfo(transactionVerificationDto);
