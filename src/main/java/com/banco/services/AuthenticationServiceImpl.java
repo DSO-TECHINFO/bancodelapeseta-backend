@@ -7,7 +7,8 @@ import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
 import com.banco.repositories.RoleRepository;
 import com.banco.security.JwtService;
-import com.banco.utils.NonNullFields;
+import com.banco.utils.CopyNonNullFields;
+import com.banco.utils.EntityUtils;
 import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -34,12 +35,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EntityRepository entityRepository;
     private final JwtService jwtService;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordUtils passwordUtils;
-    private final NonNullFields nonNullFields;
+    private final CopyNonNullFields copyNonNullFields;
     private final NotificationService notificationService;
     private final VerifyService verifyService;
+    private final EntityUtils entityUtils;
     @Override
     public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
         try {
@@ -128,7 +129,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
 
-        nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
+        copyNonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.PHYSICAL);
         entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
@@ -167,7 +168,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-011", "Company set up date cannot be a date after today", 400);
 
 
-        nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
+        copyNonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
 
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.COMPANY);
@@ -177,7 +178,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void passwordChange(PasswordChangeDto passwordChangeDto) throws CustomException {
-        Entity user = checkIfEntityExists(extractUser());
+        Entity user = entityUtils.checkIfEntityExists(entityUtils.extractUser());
         if(verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(),true)){
             if(!passwordUtils.checkPasswordValid(passwordChangeDto.getNewPassword()))
                 throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
@@ -210,7 +211,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException {
-        Entity entity = checkIfEntityExists(extractUser());
+        Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
         if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
             if(signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
@@ -223,7 +224,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void recoveryPassword(RecoveryPasswordDto recoveryPasswordDto) throws CustomException {
-        Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordDto.getTaxId()));
+        Entity entity = entityUtils.checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordDto.getTaxId()));
         if(!entity.getPhoneConfirmed())
             throw new CustomException("USERS-030", "Phone needs to be verified", 400);
         if(!entity.getEmailConfirmed())
@@ -253,7 +254,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException {
-        Entity user = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordChangeDto.getTaxId()));
+        Entity user = entityUtils.checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordChangeDto.getTaxId()));
 
         verifyService.verifyPasswordRecoveryCode(recoveryPasswordChangeDto.getRecoveryCode(), user);
         if(!passwordUtils.checkPasswordValid(recoveryPasswordChangeDto.getNewPassword()))
@@ -269,7 +270,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public RecoveryPasswordCodeReturnDto recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
-        Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordCodeInputDto.getTaxId()));
+        Entity entity = entityUtils.checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordCodeInputDto.getTaxId()));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(entity, null, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -306,17 +307,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         notificationService.sendSMS(data, entity, SMSType.VERIFY);
     }
-
-    private Optional<Entity> extractUser() throws CustomException {
-        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
-        return entityRepository.findByTaxId(userTaxId);
-    }
-
-    private static Entity checkIfEntityExists(Optional<Entity> userOptional) throws CustomException {
-        if(userOptional.isEmpty())
-            throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
-        return userOptional.get();
-    }
-
-
 }
