@@ -6,6 +6,7 @@ import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.RoleRepository;
 import com.banco.security.JwtService;
+import com.banco.utils.EntityUtils;
 import com.banco.utils.NonNullFields;
 import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final NonNullFields nonNullFields;
     private final NotificationService notificationService;
     private final VerifyService verifyService;
-    private final EntityService entityService;
+    private final EntityUtils entityUtils;
 
     @Override
     public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
@@ -46,28 +47,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
             String taxId = authenticationRequestDto.getUsername();
-            Entity finalEntity = entityService.getEntityInfo(taxId);
+            Entity finalEntity = entityUtils.getEntityInfo(taxId);
             if (finalEntity.getLoginAttempts() == null)
                 finalEntity.setLoginAttempts((short) 0);
             short attempts = finalEntity.getLoginAttempts();
             if (attempts < 3) {
                 finalEntity.setLoginAttempts(++attempts);
-                entityService.saveEntityInfo(finalEntity);
+                entityUtils.saveEntityInfo(finalEntity);
                 throw new CustomException("USERS-001", "Wrong username or password", 401);
             } else {
                 finalEntity.setLocked(true);
                 finalEntity.setLastAttempt(new Timestamp(System.currentTimeMillis() + 1000 * 60 * 10));
-                entityService.saveEntityInfo(finalEntity);
+                entityUtils.saveEntityInfo(finalEntity);
                 throw new CustomException("USERS-002", "User is locked, try again in: 10 minutes", 401);
             }
         } catch (LockedException e) {
             String taxId = authenticationRequestDto.getUsername();
-            Entity entity = entityService.getEntityInfo(taxId);
+            Entity entity = entityUtils.getEntityInfo(taxId);
             if (entity.getLastAttempt().before(new Timestamp(System.currentTimeMillis()))) {
                 entity.setLocked(false);
                 entity.setLastAttempt(null);
                 entity.setLoginAttempts((short) 0);
-                entityService.saveEntityInfo(entity);
+                entityUtils.saveEntityInfo(entity);
                 return this.login(authenticationRequestDto, request);
             } else {
                 long diffInSecs = Duration.between(Instant.now(), entity.getLastAttempt().toInstant())
@@ -80,7 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-005", "Confirm your email and phone to continue, you can resend email and phone code.", 401);
         }
         String taxId = authenticationRequestDto.getUsername();
-        Entity entity = entityService.getEntityInfo(taxId);
+        Entity entity = entityUtils.getEntityInfo(taxId);
         entity.setLoginAttempts((short) 0);
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         String userAgent = request.getHeader("User-Agent");
@@ -91,7 +92,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             notificationService.sendNewLogin(entity,request.getRemoteAddr());
         entity.setLastIpAddress(ipAddress);
         entity.setUserBrowser(userAgent);
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
         return AuthenticationResponseDto.builder().token(jwtService.generateToken(entity)).build();
     }
 
@@ -132,7 +133,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.PHYSICAL);
         entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
     }
     @Transactional
     @Override
@@ -172,19 +173,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.COMPANY);
         entity.setPassword(passwordEncoder.encode(registerCompanyDto.getPassword()));
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
     }
 
     @Override
     public void passwordChange(PasswordChangeDto passwordChangeDto) throws CustomException {
-        Entity user = entityService.getCurrentUserInfo();
+        Entity user = entityUtils.getCurrentUserInfo();
         if(verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(),true)){
             if(!passwordUtils.checkPasswordValid(passwordChangeDto.getNewPassword()))
                 throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
             if(passwordEncoder.matches(passwordChangeDto.getNewPassword(),user.getPassword()))
                 throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
             user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
-            entityService.saveEntityInfo(user);
+            entityUtils.saveEntityInfo(user);
         }
     }
 
@@ -195,7 +196,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setEmail(emailChangeDto.getNewEmail());
         entity.setEmailConfirmed(false);
         entity.setEmailConfirmationCode(null);
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
     }
 
     @Override
@@ -205,26 +206,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPhoneNumber(phoneChangeDto.getNewPhone());
         entity.setPhoneConfirmed(false);
         entity.setPhoneConfirmationCode(null);
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
     }
 
     @Override
     public void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException {
-        Entity entity = entityService.getCurrentUserInfo();
+        Entity entity = entityUtils.getCurrentUserInfo();
         if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
             if(signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
             entity.setSign(passwordEncoder.encode(signCreateDto.getSign()));
             entity.setSignActivated(true);
             entity.setSignAttempts(0);
-            entityService.saveEntityInfo(entity);
+            entityUtils.saveEntityInfo(entity);
         }
     }
 
     @Override
     public void recoveryPassword(RecoveryPasswordDto recoveryPasswordDto) throws CustomException {
         String taxId = recoveryPasswordDto.getTaxId();
-        Entity entity = entityService.getEntityInfo(taxId);
+        Entity entity = entityUtils.getEntityInfo(taxId);
         if(!entity.getPhoneConfirmed())
             throw new CustomException("USERS-030", "Phone needs to be verified", 400);
         if(!entity.getEmailConfirmed())
@@ -255,7 +256,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException {
         String taxId = recoveryPasswordChangeDto.getTaxId();
-        Entity user = entityService.getEntityInfo(taxId);
+        Entity user = entityUtils.getEntityInfo(taxId);
 
         verifyService.verifyPasswordRecoveryCode(recoveryPasswordChangeDto.getRecoveryCode(), user);
         if(!passwordUtils.checkPasswordValid(recoveryPasswordChangeDto.getNewPassword()))
@@ -263,14 +264,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(),user.getPassword()))
             throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
         user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
-        entityService.saveEntityInfo(user);
+        entityUtils.saveEntityInfo(user);
 
     }
 
     @Override
     public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
         String taxId = recoveryPasswordCodeInputDto.getTaxId();
-        Entity entity = entityService.getEntityInfo(taxId);
+        Entity entity = entityUtils.getEntityInfo(taxId);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(entity, null, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -282,7 +283,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPasswordChangeCode(passwordEncoder.encode(randomCode));
         entity.setPasswordChangeCodeAttempts(0);
         entity.setPasswordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
         RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode);
 
     }

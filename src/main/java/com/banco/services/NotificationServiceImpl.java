@@ -14,6 +14,7 @@ import com.banco.entities.EmailType;
 import com.banco.entities.Entity;
 import com.banco.entities.SMSType;
 import com.banco.exceptions.CustomException;
+import com.banco.utils.EntityUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -52,18 +53,18 @@ public class NotificationServiceImpl implements NotificationService{
     @Autowired
     private AmazonS3 s3Client;
     @Autowired
-    private EntityService entityService;
+    private EntityUtils entityUtils;
 
 
     @Override
     public void sendEmailVerificationCode() throws CustomException {
-        Entity user = entityService.getCurrentUserInfo();
+        Entity user = entityUtils.getCurrentUserInfo();
         String code = RandomStringUtils.randomNumeric(6);
         String coded = passwordEncoder.encode(code);
         user.setEmailConfirmationCode(coded);
         user.setEmailConfirmationCodeAttempts(0);
         user.setEmailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-        entityService.saveEntityInfo(user);
+        entityUtils.saveEntityInfo(user);
         Map<String, Object> map = new HashMap<>();
         map.put("code", code);
         map.put("subject", "Verification code");
@@ -72,7 +73,7 @@ public class NotificationServiceImpl implements NotificationService{
 
     @Override
     public void sendPhoneVerificationCode() throws CustomException {
-        Entity user = entityService.getCurrentUserInfo();
+        Entity user = entityUtils.getCurrentUserInfo();
         String code = RandomStringUtils.randomNumeric(6);
         String coded = passwordEncoder.encode(code);
         Map<String, Object> data = new HashMap<>();
@@ -81,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService{
         user.setPhoneConfirmationCode(coded);
         user.setPhoneConfirmationCodeAttempts(0);
         user.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-        entityService.saveEntityInfo(user);
+        entityUtils.saveEntityInfo(user);
     }
 
     //TODO
@@ -182,7 +183,7 @@ public class NotificationServiceImpl implements NotificationService{
                     .withSource(sourceMail);
             amazonSimpleEmailService.sendEmail(request);
             entity.setNextSendEmail(new Date( System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-            entityService.saveEntityInfo(entity);
+            entityUtils.saveEntityInfo(entity);
         } catch (Exception ex) {
             if(environment.equals("local")||environment.equals("dev"))
                 throw new CustomException("NOTIFICATIONS-005", ex.getMessage(), 500);
@@ -200,7 +201,7 @@ public class NotificationServiceImpl implements NotificationService{
 
         pubTextSMS(snsClient, message, phoneNumber);
         entity.setNextSendPhone(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
-        entityService.saveEntityInfo(entity);
+        entityUtils.saveEntityInfo(entity);
     }
     private Map<String,Object> loadMailTemplate(Map<String, Object> data, EmailType emailType) throws IOException {
         String template;

@@ -1,4 +1,4 @@
-package com.banco.services;
+package com.banco.utils;
 
 import com.banco.entities.Entity;
 import com.banco.exceptions.CustomException;
@@ -13,23 +13,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class EntityServiceImpl implements EntityService{
+public class EntityUtils {
 
     private final EntityRepository entityRepository;
 
-    @Override
     public Entity getEntityInfo(String taxId) throws CustomException {
         Optional<Entity> optionalEntity = entityRepository.findByTaxId(taxId);
         return checkIfEntityExists(optionalEntity);
     }
 
-    @Override
     public Entity getCurrentUserInfo() throws CustomException {
         return checkIfEntityExists(extractUser());
     }
 
-    @Override
-    public Entity saveEntityInfo(Entity entity) throws CustomException {
+    public Entity saveEntityInfo(Entity entity) {
         return entityRepository.save(entity);
     }
 
