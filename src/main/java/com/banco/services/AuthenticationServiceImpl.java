@@ -1,6 +1,5 @@
 package com.banco.services;
 
-
 import com.banco.dtos.*;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
@@ -32,7 +31,6 @@ import java.util.random.RandomGenerator;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-
     private final AuthenticationManager authenticationManager;
     private final EntityRepository entityRepository;
     private final JwtService jwtService;
@@ -42,10 +40,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final NonNullFields nonNullFields;
     private final NotificationService notificationService;
     private final VerifyService verifyService;
+
     @Override
-    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
+    public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto,
+            HttpServletRequest request) throws CustomException, IOException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequestDto.getUsername(), authenticationRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
             Optional<Entity> user = entityRepository.findByTaxId(authenticationRequestDto.getUsername());
             if (user.isEmpty())
@@ -77,20 +78,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .getSeconds();
                 long minutes = Math.floorDiv(diffInSecs, 60L);
                 long secs = diffInSecs % 60;
-                throw new CustomException("USERS-004", "User is locked, try again in: " + minutes + " minutes and " + secs + " seconds", 401);
+                throw new CustomException("USERS-004",
+                        "User is locked, try again in: " + minutes + " minutes and " + secs + " seconds", 401);
             }
         } catch (DisabledException e) {
-            throw new CustomException("USERS-005", "Confirm your email and phone to continue, you can resend email and phone code.", 401);
+            throw new CustomException("USERS-005",
+                    "Confirm your email and phone to continue, you can resend email and phone code.", 401);
         }
         Entity entity = entityRepository.findByTaxId(authenticationRequestDto.getUsername()).orElseThrow();
         entity.setLoginAttempts((short) 0);
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         String userAgent = request.getHeader("User-Agent");
-        if(entity.getLastIpAddress() != null
+        if (entity.getLastIpAddress() != null
                 && !entity.getLastIpAddress().equals(ipAddress)
                 && entity.getUserBrowser() != null
                 && entity.getUserBrowser().equals(userAgent))
-            notificationService.sendNewLogin(entity,request.getRemoteAddr());
+            notificationService.sendNewLogin(entity, request.getRemoteAddr());
         entity.setLastIpAddress(ipAddress);
         entity.setUserBrowser(userAgent);
         entityRepository.save(entity);
@@ -99,7 +102,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException {
+    public void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request)
+            throws CustomException {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         String userAgent = request.getHeader("User-Agent");
         Entity entity = Entity.builder()
@@ -109,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .locked(false)
                 .signActivated(false)
                 .type(EntityType.PHYSICAL)
-                .loginAttempts((short)0)
+                .loginAttempts((short) 0)
                 .employee(false)
                 .lastAttempt(new Date())
                 .lastIpAddress(ipAddress)
@@ -117,18 +121,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .createdIpAddress(ipAddress)
                 .build();
 
-        if(!passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())){
+        if (!passwordUtils.checkPasswordValid(registerPhysicalDto.getPassword())) {
             throw new CustomException("USERS-006", "Password does not fit password requirements", 400);
         }
-        if(registerPhysicalDto.getDebtType() != EntityDebtType.FREELANCE
+        if (registerPhysicalDto.getDebtType() != EntityDebtType.FREELANCE
                 && registerPhysicalDto.getDebtType() != EntityDebtType.STATE_WORKER
                 && registerPhysicalDto.getDebtType() != EntityDebtType.SALARIED
-                && registerPhysicalDto.getDebtType() != EntityDebtType.PENSIONER ){
+                && registerPhysicalDto.getDebtType() != EntityDebtType.PENSIONER) {
             throw new CustomException("USERS-007", "Physical person cannot have company debt type", 400);
         }
-        if(registerPhysicalDto.getNationalIdExpiration().before(new Date()))
+        if (registerPhysicalDto.getNationalIdExpiration().before(new Date()))
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
-
 
         nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
@@ -136,9 +139,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
         entityRepository.save(entity);
     }
+
     @Transactional
     @Override
-    public void registerCompany(RegisterCompanyDto registerCompanyDto, HttpServletRequest request) throws CustomException {
+    public void registerCompany(RegisterCompanyDto registerCompanyDto, HttpServletRequest request)
+            throws CustomException {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         String userAgent = request.getHeader("User-Agent");
         Entity entity = Entity.builder()
@@ -148,7 +153,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .locked(false)
                 .signActivated(false)
                 .type(EntityType.COMPANY)
-                .loginAttempts((short)0)
+                .loginAttempts((short) 0)
                 .employee(false)
                 .lastAttempt(new Date())
                 .lastIpAddress(ipAddress)
@@ -156,18 +161,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .createdIpAddress(ipAddress)
                 .build();
 
-        if(!passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())){
+        if (!passwordUtils.checkPasswordValid(registerCompanyDto.getPassword())) {
             throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
         }
-        if(registerCompanyDto.getDebtType() != EntityDebtType.PYME
+        if (registerCompanyDto.getDebtType() != EntityDebtType.PYME
                 && registerCompanyDto.getDebtType() != EntityDebtType.MICROCOMPANY
                 && registerCompanyDto.getDebtType() != EntityDebtType.STARTUP
-                && registerCompanyDto.getDebtType() != EntityDebtType.COMPANY ){
+                && registerCompanyDto.getDebtType() != EntityDebtType.COMPANY) {
             throw new CustomException("USERS-010", "Company canoot have physical person debt type", 400);
         }
-        if(registerCompanyDto.getSettingUpDate().after(new Date()))
+        if (registerCompanyDto.getSettingUpDate().after(new Date()))
             throw new CustomException("USERS-011", "Company set up date cannot be a date after today", 400);
-
 
         nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
 
@@ -180,10 +184,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void passwordChange(PasswordChangeDto passwordChangeDto) throws CustomException {
         Entity user = checkIfEntityExists(extractUser());
-        if(verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(),true)){
-            if(!passwordUtils.checkPasswordValid(passwordChangeDto.getNewPassword()))
+        if (verifyService.verifyTransactionCode(passwordChangeDto.getSignedTransactionCode(), true)) {
+            if (!passwordUtils.checkPasswordValid(passwordChangeDto.getNewPassword()))
                 throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
-            if(passwordEncoder.matches(passwordChangeDto.getNewPassword(),user.getPassword()))
+            if (passwordEncoder.matches(passwordChangeDto.getNewPassword(), user.getPassword()))
                 throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
             user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
             entityRepository.save(user);
@@ -213,8 +217,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void signCreateOrModify(SignCreateDto signCreateDto) throws CustomException {
         Entity entity = checkIfEntityExists(extractUser());
-        if(verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)){
-            if(signCreateDto.getSign().length() != 6)
+        if (verifyService.verifyTransactionCode(signCreateDto.getVerificationCode(), false)) {
+            if (signCreateDto.getSign().length() != 6)
                 throw new CustomException("USERS-010", "Invalid sign length", 400);
             entity.setSign(passwordEncoder.encode(signCreateDto.getSign()));
             entity.setSignActivated(true);
@@ -226,30 +230,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void recoveryPassword(RecoveryPasswordDto recoveryPasswordDto) throws CustomException {
         Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordDto.getTaxId()));
-        if(!entity.getPhoneConfirmed())
+        if (!entity.getPhoneConfirmed())
             throw new CustomException("USERS-030", "Phone needs to be verified", 400);
-        if(!entity.getEmailConfirmed())
+        if (!entity.getEmailConfirmed())
             throw new CustomException("USERS-031", "Email needs to be verified", 400);
         switch (recoveryPasswordDto.getType()) {
             case PHYSICAL -> {
                 if (recoveryPasswordDto.getPhone().equals(entity.getPhoneNumber())
                         && recoveryPasswordDto.getBirthday().equals(entity.getBirthday())
                         && recoveryPasswordDto.getNationalIdExpiration().equals(entity.getNationalIdExpiration())
-                        && recoveryPasswordDto.getType() == entity.getType()){
+                        && recoveryPasswordDto.getType() == entity.getType()) {
                     generateCodesAndSend(entity);
                     return;
                 }
                 throw new CustomException("USERS-020", "Data is invalid", 400);
             }
-        case COMPANY ->{
-            if (recoveryPasswordDto.getPhone().equals(entity.getPhoneNumber())
-                    && recoveryPasswordDto.getSettingUpDate().equals(entity.getSettingUpDate())
-                    && recoveryPasswordDto.getType() == entity.getType()){
-                generateCodesAndSend(entity);
-                return;
+            case COMPANY -> {
+                if (recoveryPasswordDto.getPhone().equals(entity.getPhoneNumber())
+                        && recoveryPasswordDto.getSettingUpDate().equals(entity.getSettingUpDate())
+                        && recoveryPasswordDto.getType() == entity.getType()) {
+                    generateCodesAndSend(entity);
+                    return;
+                }
+                throw new CustomException("USERS-020", "Data is invalid", 400);
             }
-            throw new CustomException("USERS-020", "Data is invalid", 400);
-        }
         }
     }
 
@@ -258,9 +262,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Entity user = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordChangeDto.getTaxId()));
 
         verifyService.verifyPasswordRecoveryCode(recoveryPasswordChangeDto.getRecoveryCode(), user);
-        if(!passwordUtils.checkPasswordValid(recoveryPasswordChangeDto.getNewPassword()))
+        if (!passwordUtils.checkPasswordValid(recoveryPasswordChangeDto.getNewPassword()))
             throw new CustomException("USERS-009", "Password does not fit password requirements", 400);
-        if(passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(),user.getPassword()))
+        if (passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(), user.getPassword()))
             throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
         user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
         entityRepository.save(user);
@@ -268,7 +272,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
+    public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto)
+            throws CustomException {
         Entity entity = checkIfEntityExists(entityRepository.findByTaxId(recoveryPasswordCodeInputDto.getTaxId()));
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(entity, null, null);
@@ -308,15 +313,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private Optional<Entity> extractUser() throws CustomException {
-        String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
+        String userTaxId = SecurityContextHolder.getContext().getAuthentication().getName();
         return entityRepository.findByTaxId(userTaxId);
     }
 
     private static Entity checkIfEntityExists(Optional<Entity> userOptional) throws CustomException {
-        if(userOptional.isEmpty())
+        if (userOptional.isEmpty())
             throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
         return userOptional.get();
     }
-
 
 }
