@@ -10,6 +10,7 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.*;
 
 import com.amazonaws.util.IOUtils;
+import com.banco.dtos.EmailPhoneCodeExpirationReturn;
 import com.banco.entities.EmailType;
 import com.banco.entities.Entity;
 import com.banco.entities.SMSType;
@@ -58,7 +59,7 @@ public class NotificationServiceImpl implements NotificationService{
 
 
     @Override
-    public void sendEmailVerificationCode() throws CustomException {
+    public EmailPhoneCodeExpirationReturn sendEmailVerificationCode() throws CustomException {
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
         if(userOptional.isEmpty())
@@ -75,10 +76,11 @@ public class NotificationServiceImpl implements NotificationService{
         sendMail(user, map, EmailType.EMAIL_VERIFICATION);
         user.setNextSendEmail(new Date( System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
+        return  EmailPhoneCodeExpirationReturn.builder().expirationDate(user.getNextSendEmail()).build();
     }
 
     @Override
-    public void sendPhoneVerificationCode() throws CustomException {
+    public EmailPhoneCodeExpirationReturn sendPhoneVerificationCode() throws CustomException {
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Entity> userOptional = entityRepository.findByTaxId(userTaxId);
         if(userOptional.isEmpty())
@@ -93,6 +95,7 @@ public class NotificationServiceImpl implements NotificationService{
         user.setPhoneConfirmationCodeAttempts(0);
         user.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityRepository.save(user);
+        return EmailPhoneCodeExpirationReturn.builder().expirationDate(user.getNextSendEmail()).build();
     }
 
     //TODO
@@ -193,6 +196,7 @@ public class NotificationServiceImpl implements NotificationService{
                     .withSource(sourceMail);
             amazonSimpleEmailService.sendEmail(request);
             entityRepository.save(entity);
+
         } catch (Exception ex) {
             if(environment.equals("local")||environment.equals("dev"))
                 throw new CustomException("NOTIFICATIONS-005", ex.getMessage(), 500);
