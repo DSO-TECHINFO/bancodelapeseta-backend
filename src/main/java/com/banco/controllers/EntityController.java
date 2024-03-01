@@ -15,6 +15,6 @@ public class EntityController {
     private final EntityService entityService;
     @GetMapping("")
     public ResponseEntity<?> getEntityInfo() throws CustomException {
-        return ResponseEntity.ok(entityService.getEntityInfo());
+        return ResponseEntity.ok(entityService.getCurrentUserInfo());
     }
 }
