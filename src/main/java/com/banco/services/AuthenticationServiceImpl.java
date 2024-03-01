@@ -88,8 +88,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(entity.getLastIpAddress() != null
                 && !entity.getLastIpAddress().equals(ipAddress)
                 && entity.getUserBrowser() != null
-                && entity.getUserBrowser().equals(userAgent))
-            notificationService.sendNewLogin(entity,request.getRemoteAddr());
+                && entity.getUserBrowser().equals(userAgent)) {
+            try {
+                notificationService.sendNewLogin(entity, request.getRemoteAddr());
+            } catch (CustomException e) {
+               System.out.println("Email must wait to send it again");
+            }
+        }
         entity.setLastIpAddress(ipAddress);
         entity.setUserBrowser(userAgent);
         entityRepository.save(entity);
