@@ -33,13 +33,9 @@ public class Contract {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToOne
     private Product product;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @ManyToOne
-    private Role role;
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "entity_contract", joinColumns = @JoinColumn(name = "contract_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "entity_id", referencedColumnName = "id"))
-    private List<com.banco.entities.Entity> entities;
+    @OneToMany(mappedBy = "contract")
+    private List<EntityContract> entityContract;
     @OneToOne(mappedBy = "contract")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)

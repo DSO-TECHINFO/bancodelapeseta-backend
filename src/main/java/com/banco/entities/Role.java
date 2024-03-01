@@ -11,7 +11,6 @@ import java.util.Objects;
 @Data
 @Builder
 @Entity
-@Table(name = "role")
 public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
