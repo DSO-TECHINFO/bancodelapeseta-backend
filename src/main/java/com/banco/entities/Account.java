@@ -18,6 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +42,6 @@ public class Account {
     private Currency currency;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Contract contract;
 }

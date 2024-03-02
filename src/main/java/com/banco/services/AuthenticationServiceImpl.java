@@ -5,7 +5,6 @@ import com.banco.dtos.*;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
-import com.banco.repositories.RoleRepository;
 import com.banco.security.JwtService;
 import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
