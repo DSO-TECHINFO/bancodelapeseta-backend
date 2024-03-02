@@ -29,8 +29,9 @@ public class EntityContract {
     @ManyToOne(cascade = CascadeType.ALL)
     private Contract contract;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @OneToOne
-    private Role role;
+    @Column
+    private EntityContractRole role;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private BigDecimal participationPercentage;
 }
