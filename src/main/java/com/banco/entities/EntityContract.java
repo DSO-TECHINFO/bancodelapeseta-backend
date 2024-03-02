@@ -1,53 +1,37 @@
 package com.banco.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.*;
 
-@Entity
+import java.math.BigDecimal;
+import java.util.List;
+
+@jakarta.persistence.Entity
+@Table(name = "entity_contract")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Card {
+public class EntityContract {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @JsonIgnore
-    @OneToOne
+    @ManyToOne
+    private Entity entity;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Contract contract;
-
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private String cvv;
-
+    private EntityContractRole role;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private String number;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Column
-    private String expiration;
-
-    @JsonIgnore
-    @Column
-    private Double cashier_limit;
-
-    @JsonIgnore
-    @Column
-    private Double daily_buyout_limit;
-
-    @JsonIgnore
-    @Column
-    private Short activated;
-
-    @JsonIgnore
-    @Column
-    private Date activation_date;
+    private BigDecimal participationPercentage;
 }

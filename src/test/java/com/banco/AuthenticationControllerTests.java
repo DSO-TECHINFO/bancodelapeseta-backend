@@ -308,6 +308,32 @@ public class AuthenticationControllerTests {
     }
     @Test
     @Transactional
+    public void testRecoveryPasswordCheckCode() throws Exception {
+
+        String mockedCode = "CODETEST";
+        String taxId = "123456789A";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .phoneConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .phoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .phoneConfirmationCodeAttempts(0)
+                        .emailConfirmationCode(passwordEncoder.encode(mockedCode))
+                        .emailConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .emailConfirmationCodeAttempts(0)
+                        .sign(passwordEncoder.encode(mockedCode))
+                        .signActivated(true)
+                        .signAttempts(0)
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/recovery/password/check/code").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(RecoveryPasswordCodeInputDto.builder().emailCode(mockedCode).phoneCode(mockedCode).sign(mockedCode).taxId(taxId).build())))
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @Transactional
     public void testRecoveryChangePasswordVerifyCodeIsWrongBadRequest() throws Exception {
 
         String mockedCode = "CODETEST";

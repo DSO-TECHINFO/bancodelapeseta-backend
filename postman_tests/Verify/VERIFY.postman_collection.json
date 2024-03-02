@@ -1,0 +1,145 @@
+{
+	"info": {
+		"_postman_id": "25cea373-8ffd-4b33-b1bc-c13e2761f3db",
+		"name": "VERIFY",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16535267",
+		"_collection_link": "https://www.postman.com/planetary-meteor-511870/workspace/bancodelapeseta/collection/16535267-25cea373-8ffd-4b33-b1bc-c13e2761f3db?action=share&source=collection_link&creator=16535267"
+	},
+	"item": [
+		{
+			"name": "EMAIL",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/verify/email",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"verify",
+						"email"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PHONE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"236727\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/verify/phone",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"verify",
+						"phone"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VERIFICATION UNSIGNED",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"emailCode\": \"096370\",\r\n    \"phoneCode\": \"523701\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/verify/transaction/unsigned",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"verify",
+						"transaction",
+						"unsigned"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VERIFRICATION SIGNED",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Authorization}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"emailCode\": \"329542\",\r\n    \"phoneCode\": \"002550\",\r\n    \"sign\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{HOST}}/verify/transaction/signed",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"verify",
+						"transaction",
+						"signed"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
