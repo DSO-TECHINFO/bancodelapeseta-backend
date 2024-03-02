@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import com.banco.repositories.EntityRepository;
+import com.banco.utils.EntityUtils;
 import com.banco.dtos.TransactionVerificationDto;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.CardRepository;
@@ -23,11 +24,12 @@ public class CardServiceImpl implements CardService {
     private CardRepository cardRepository;
     private final PasswordEncoder passwordEncoder;
     private final EntityRepository entityRepository;
+    private final EntityUtils entityUtils;
     private final VerifyService verifyService;
 
     @Override
     public void accessSensitiveInfo(TransactionVerificationDto transactionVerificationDto) throws CustomException {
-        Entity entity = checkIfEntityExists(extractUser());
+        Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
         if (verifyService.verifyTransactionCode(transactionVerificationDto.getSign(), true)) {
             if (entity.getVerifyTransactionCodeAttempts() > 3)
                 throw new CustomException("USERS-032", "Too many attempts", 400);
@@ -46,16 +48,4 @@ public class CardServiceImpl implements CardService {
 
         }
     }
-
-    private Optional<Entity> extractUser() throws CustomException {
-        String userTaxId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return entityRepository.findByTaxId(userTaxId);
-    }
-
-    private static Entity checkIfEntityExists(Optional<Entity> userOptional) throws CustomException {
-        if (userOptional.isEmpty())
-            throw new CustomException("NOTIFICATIONS-002", "User not found", 404);
-        return userOptional.get();
-    }
-
 }
