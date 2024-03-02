@@ -1,68 +1,44 @@
 package com.banco.entities;
 
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
+@Data
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class LoanPayment {
 
-        private int paymentNumber;
-
-        private BigDecimal paymentAmount;
-
-        private BigDecimal InterestPaid;
-
-        private BigDecimal principalPaid;
-
-        private BigDecimal remainingBalance;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public LoanPayment() {
+    @Column
+    private int paymentNumber;
 
-        }
+    @Column
+    private BigDecimal paymentAmount;
 
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Id
-    public Long getId() {
-        return id;
-    }
-
-    public void setPaymentNumber(int paymentNumber) {
-        this.paymentNumber = paymentNumber;
-    }
-
-    public void setPaymentAmount(BigDecimal paymentAmount) {
-        this.paymentAmount = paymentAmount;
-    }
-
-    public void setInterestPaid(BigDecimal interestPaid) {
-        InterestPaid = interestPaid;
-    }
-
-    public void setPrincipalPaid(BigDecimal principalPaid) {
-        this.principalPaid = principalPaid;
-    }
-
-    public void setRemainingBalance(BigDecimal remainingBalance) {
-        this.remainingBalance = remainingBalance;
-    }
+    @Column
+    private BigDecimal interestPaid;
+    @Column
+    private BigDecimal amortization;
+    @Column
+    private BigDecimal remainingBalance;
 
     @Override
-    public String toString() {
-        return "LoanPayment{" +
-                "paymentNumber=" + paymentNumber +
-                ", paymentAmount=" + paymentAmount +
-                ", InterestPaid=" + InterestPaid +
-                ", principalPaid=" + principalPaid +
-                ", remainingBalance=" + remainingBalance +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LoanPayment that = (LoanPayment) o;
+        return paymentNumber == that.paymentNumber && Objects.equals(id, that.id) && Objects.equals(paymentAmount, that.paymentAmount) && Objects.equals(interestPaid, that.interestPaid) && Objects.equals(amortization, that.amortization) && Objects.equals(remainingBalance, that.remainingBalance);
     }
 }

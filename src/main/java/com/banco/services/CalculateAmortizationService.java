@@ -26,7 +26,7 @@ public class CalculateAmortizationService {
             payment.setPaymentNumber(i + 1);
             payment.setPaymentAmount(monthlyPayment.setScale(2, RoundingMode.HALF_UP));
             payment.setInterestPaid(interestPayment);
-            payment.setPrincipalPaid(principalPayment);
+            payment.setAmortization(principalPayment);
             payment.setRemainingBalance(remainingBalance);
             payments.add(payment);
         }
