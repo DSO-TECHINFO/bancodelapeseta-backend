@@ -26,7 +26,7 @@ public class EntityContract {
     @ManyToOne
     private Entity entity;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Contract contract;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToOne

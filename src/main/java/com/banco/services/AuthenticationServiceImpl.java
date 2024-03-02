@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 && entity.getUserBrowser() != null
                 && entity.getUserBrowser().equals(userAgent)) {
             try {
-                notificationService.sendNewLogin(entity, request.getRemoteAddr());
+                notificationService.sendNewLogin(entity, ipAddress);
             } catch (CustomException e) {
                System.out.println("Email must wait to send it again");
             }
