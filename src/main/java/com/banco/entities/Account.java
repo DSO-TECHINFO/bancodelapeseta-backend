@@ -37,6 +37,8 @@ public class Account {
     @JsonIgnore
     @Column
     private Boolean locked;
+    @ManyToOne
+    private Currency currency;
 
     @JsonIgnore
     @OneToOne
