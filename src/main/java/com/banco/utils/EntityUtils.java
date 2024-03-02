@@ -5,7 +5,7 @@ import com.banco.exceptions.CustomException;
 import com.banco.repositories.EntityRepository;
 
 import lombok.AllArgsConstructor;
-import lombok.Setter;
+import lombok.NonNull;
 
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ public class EntityUtils {
 
     private final EntityRepository entityRepository;
 
-    private final CustomException USER_NOT_FOUND = new CustomException("NOTIFICATIONS--02", "User not found", 404);
+    private final CustomException USER_NOT_FOUND = new CustomException("NOTIFICATIONS-002", "User not found", 404);
 
     public Entity getEntityInfo(String taxId, CustomException entityNotFoundException) throws CustomException {
         Optional<Entity> optionalEntity = entityRepository.findByTaxId(taxId);
@@ -29,21 +29,13 @@ public class EntityUtils {
         return getEntityInfo(taxId, USER_NOT_FOUND);
     }
 
-    public Entity getCurrentUserInfo(CustomException customException) throws CustomException {
-        return checkIfEntityExists(extractUser(), customException);
-    }
-
-    public Entity getCurrentUserInfo() throws CustomException {
-        return getCurrentUserInfo(USER_NOT_FOUND);
-    }
-
-    public Entity saveEntityInfo(Entity entity) {
-        return entityRepository.save(entity);
-    }
-
-    private Optional<Entity> extractUser() {
+    public Entity getCurrentUserInfo() {
         String userTaxId =  SecurityContextHolder.getContext().getAuthentication().getName();
-        return entityRepository.findByTaxId(userTaxId);
+        return entityRepository.findByTaxId(userTaxId).get();
+    }
+
+    public Entity saveEntityInfo(@NonNull Entity entity) {
+        return entityRepository.save(entity);
     }
 
     private Entity checkIfEntityExists(Optional<Entity> userOptional, CustomException entityNotFoundException) throws CustomException {
