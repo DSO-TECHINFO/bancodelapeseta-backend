@@ -45,6 +45,8 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-001", "This product is not available yet", 400);
         if(product.getType() != ProductType.ACCOUNT)
             throw new CustomException("ACCOUNTS-002", "This product is not eligible to create an account", 400);
+        if(product.getEntityType() != entity.getType())
+            throw new CustomException("ACCOUNTS-003", "You cannot chose that product", 400);
         Account account = Account.builder().currency(currency).accountNumber("ES" + RandomStringUtils.randomNumeric(18)).balance(new BigDecimal(0)).real_balance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
         Contract contract = Contract.builder().creationDate(new Date()).account(account).product(product).type(ContractType.ACCOUNT).build();
         account.setContract(contract);
