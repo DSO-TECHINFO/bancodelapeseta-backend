@@ -1,19 +1,19 @@
 package com.banco.services;
 
+import com.banco.dtos.EmailPhoneCodeExpirationReturn;
 import com.banco.entities.EmailType;
 import com.banco.entities.Entity;
 import com.banco.entities.SMSType;
 import com.banco.exceptions.CustomException;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.Map;
 
 public interface NotificationService {
 
-    void sendEmailVerificationCode() throws CustomException;
+    EmailPhoneCodeExpirationReturn sendEmailVerificationCode() throws CustomException;
 
-    void sendPhoneVerificationCode() throws CustomException;
+    EmailPhoneCodeExpirationReturn sendPhoneVerificationCode() throws CustomException;
 
     void sendAccountDataModification() throws CustomException;
     void sendCardCharge() throws CustomException;

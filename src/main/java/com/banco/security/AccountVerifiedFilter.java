@@ -45,8 +45,11 @@ public class AccountVerifiedFilter extends OncePerRequestFilter {
             if(user.isEmpty())
                 return;
             userPresent = user.get();
-            if(userPresent.getEmailConfirmed() && userPresent.getPhoneConfirmed())
+            if(userPresent.getEmailConfirmed() && userPresent.getPhoneConfirmed()) {
                 filterChain.doFilter(request, response);
+                return;
+            }
+            response.setStatus(403);
             return;
         }
         filterChain.doFilter(request,response);

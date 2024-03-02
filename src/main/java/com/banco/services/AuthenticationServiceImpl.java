@@ -6,8 +6,8 @@ import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.RoleRepository;
 import com.banco.security.JwtService;
+import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
-import com.banco.utils.NonNullFields;
 import com.banco.utils.PasswordUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -33,14 +33,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordUtils passwordUtils;
-    private final NonNullFields nonNullFields;
+    private final CopyNonNullFields copyNonNullFields;
     private final NotificationService notificationService;
     private final VerifyService verifyService;
     private final EntityUtils entityUtils;
-
+    
     @Override
     public AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException {
         try {
@@ -89,8 +88,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(entity.getLastIpAddress() != null
                 && !entity.getLastIpAddress().equals(ipAddress)
                 && entity.getUserBrowser() != null
-                && entity.getUserBrowser().equals(userAgent))
-            notificationService.sendNewLogin(entity,request.getRemoteAddr());
+                && entity.getUserBrowser().equals(userAgent)) {
+            try {
+                notificationService.sendNewLogin(entity, request.getRemoteAddr());
+            } catch (CustomException e) {
+               System.out.println("Email must wait to send it again");
+            }
+        }
         entity.setLastIpAddress(ipAddress);
         entity.setUserBrowser(userAgent);
         entityUtils.saveEntityInfo(entity);
@@ -130,7 +134,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-008", "You national document has expirated.", 400);
 
 
-        nonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
+        copyNonNullFields.copyNonNullProperties(registerPhysicalDto, entity, true);
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.PHYSICAL);
         entity.setPassword(passwordEncoder.encode(registerPhysicalDto.getPassword()));
@@ -169,7 +173,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new CustomException("USERS-011", "Company set up date cannot be a date after today", 400);
 
 
-        nonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
+        copyNonNullFields.copyNonNullProperties(registerCompanyDto, entity, true);
 
         entity.setCreatedIpAddress(request.getHeader("X-FORWARDED-FOR"));
         entity.setType(EntityType.COMPANY);
@@ -265,12 +269,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(passwordEncoder.matches(recoveryPasswordChangeDto.getNewPassword(),user.getPassword()))
             throw new CustomException("USERS-015", "Password cannot be the same as the old password", 400);
         user.setPassword(passwordEncoder.encode(recoveryPasswordChangeDto.getNewPassword()));
+        user.setPasswordChangeCode(null);
+        user.setPasswordChangeCodeExpiration(new Date());
         entityUtils.saveEntityInfo(user);
-
     }
 
     @Override
-    public void recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
+    public RecoveryPasswordCodeReturnDto recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
         String taxId = recoveryPasswordCodeInputDto.getTaxId();
         Entity entity = entityUtils.getEntityInfo(taxId);
 
@@ -285,7 +290,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPasswordChangeCodeAttempts(0);
         entity.setPasswordChangeCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         entityUtils.saveEntityInfo(entity);
-        RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode);
+        return RecoveryPasswordCodeReturnDto.builder().recoveryCode(randomCode).build();
 
     }
 
@@ -309,5 +314,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         entity.setPhoneConfirmationCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
         notificationService.sendSMS(data, entity, SMSType.VERIFY);
     }
-
 }

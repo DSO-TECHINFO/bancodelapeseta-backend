@@ -19,12 +19,13 @@ public class NotificationController {
     private final NotificationService notificationService;
     @GetMapping("/email/verification/code")
     public ResponseEntity<?> sendEmailVerificationCode() throws CustomException {
-        notificationService.sendEmailVerificationCode();
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok(notificationService.sendEmailVerificationCode());
     }
     @GetMapping("/phone/verification/code")
     public  ResponseEntity<?> sendPhoneVerificationCode() throws CustomException{
-        notificationService.sendPhoneVerificationCode();
-        return ResponseEntity.ok().build();
+
+
+        return ResponseEntity.ok(notificationService.sendPhoneVerificationCode());
     }
 }

@@ -27,9 +27,6 @@ public class VerifyServiceImpl implements VerifyService{
         Entity entity = entityUtils.getCurrentUserInfo();
         emailCodeCheck(emailPhoneVerificationDto.getCode(), entity);
         entity.setEmailConfirmed(true);
-        entity.setEmailConfirmationCode(null);
-        entity.setEmailConfirmationCodeAttempts(0);
-        entity.setEmailConfirmationCodeExpiration(null);
         entityUtils.saveEntityInfo(entity);
 
     }
@@ -39,11 +36,7 @@ public class VerifyServiceImpl implements VerifyService{
         Entity entity = entityUtils.getCurrentUserInfo();
         phoneCodeCheck(code, entity);
         entity.setPhoneConfirmed(true);
-        entity.setPhoneConfirmationCode(null);
-        entity.setPhoneConfirmationCodeAttempts(0);
-        entity.setPhoneConfirmationCodeExpiration(null);
         entityUtils.saveEntityInfo(entity);
-
     }
 
     @Override
@@ -97,13 +90,13 @@ public class VerifyServiceImpl implements VerifyService{
         else {
 
             final String code = RandomStringUtils.randomAlphanumeric(50);
-            VerificationCodeReturnDto verificationCodeReturnDto = VerificationCodeReturnDto.builder().verificationCode(code).build();
+
             entity.setVerifyTransactionCode(passwordEncoder.encode(code));
             entity.setVerifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entity.setVerifyTransactionCodeAttempts(0);
             entity.setVerifyWithSign(false);
             entityUtils.saveEntityInfo(entity);
-            return verificationCodeReturnDto;
+            return VerificationCodeReturnDto.builder().verificationCode(code).expirationDate(entity.getVerifyTransactionCodeExpiration()).build();
         }
 
     }
@@ -152,13 +145,13 @@ public class VerifyServiceImpl implements VerifyService{
         else {
 
             final String code = RandomStringUtils.randomAlphanumeric(50);
-            VerificationCodeReturnDto verificationCodeReturnDto = VerificationCodeReturnDto.builder().verificationCode(code).build();
             entity.setVerifyTransactionCode(passwordEncoder.encode(code));
             entity.setVerifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)));
             entity.setVerifyTransactionCodeAttempts(0);
             entity.setVerifyWithSign(true);
             entityUtils.saveEntityInfo(entity);
-            return verificationCodeReturnDto;
+
+            return VerificationCodeReturnDto.builder().verificationCode(code).expirationDate(entity.getVerifyTransactionCodeExpiration()).build();
         }
     }
 
@@ -167,11 +160,13 @@ public class VerifyServiceImpl implements VerifyService{
         if (code == null || code.isEmpty())
             throw new CustomException("VERIFICATIONS-031", "Code cannot be blank", 400);
         if(entity.getPasswordChangeCodeExpiration().before(new Date()))
-            throw new CustomException("VERIFICATIONS-031", "Code expired", 400);
+            throw new CustomException("VERIFICATIONS-032", "Code expired", 400);
+        if(entity.getPasswordChangeCodeAttempts()>2)
+            throw new CustomException("VERIFICATIONS-033", "Password change code attempts limit reached.", 400);
         if(!passwordEncoder.matches(code, entity.getPasswordChangeCode())) {
             entity.setPasswordChangeCodeAttempts(entity.getPasswordChangeCodeAttempts() + 1);
             entityUtils.saveEntityInfo(entity);
-            throw new CustomException("VERIFICATIONS-031", "Wrong code", 400);
+            throw new CustomException("VERIFICATIONS-034", "Wrong code", 400);
         }
     }
 
@@ -229,13 +224,13 @@ public class VerifyServiceImpl implements VerifyService{
     }
     void signCheck(String sign, Entity entity) throws CustomException {
         if(sign.isEmpty())
-            throw new CustomException("VERIFICATIONS-0012", "Sign cannot be blank", 400);
+            throw new CustomException("VERIFICATIONS-0013", "Sign cannot be blank", 400);
         if(entity.getSign() == null || entity.getSign().isEmpty())
-            throw new CustomException("VERIFICATIONS-0013", "You need to create a new sign first", 400);
+            throw new CustomException("VERIFICATIONS-0014", "You need to create a new sign first", 400);
         if(!entity.getSignActivated())
-            throw new CustomException("VERIFICATIONS-014", "You need to activate your sign first", 400);
+            throw new CustomException("VERIFICATIONS-015", "You need to activate your sign first", 400);
         if(entity.getSignAttempts()>2)
-            throw new CustomException("VERIFICATIONS-015", "Sign attempts limit reached, create a new sign", 400);
+            throw new CustomException("VERIFICATIONS-016", "Sign attempts limit reached, create a new sign", 400);
         if(!passwordEncoder.matches(sign, entity.getSign())) {
             entity.setSignAttempts(entity.getSignAttempts() + 1);
             entityUtils.saveEntityInfo(entity);

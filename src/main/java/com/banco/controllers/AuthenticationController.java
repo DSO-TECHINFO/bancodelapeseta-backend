@@ -50,8 +50,7 @@ public class AuthenticationController {
     }
     @PostMapping("/recovery/password/check/code")
     public ResponseEntity<?> recoveryPasswordCheckCode(@RequestBody RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException {
-        authenticationService.recoveryPasswordCheckCode(recoveryPasswordCodeInputDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(authenticationService.recoveryPasswordCheckCode(recoveryPasswordCodeInputDto));
     }
     @PostMapping("/recovery/password/change")
     public ResponseEntity<?> recoveryPasswordChange(@RequestBody RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException {
