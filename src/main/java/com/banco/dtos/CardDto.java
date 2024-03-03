@@ -23,6 +23,6 @@ public class CardDto {
     private Boolean activated;
     private Date activationDate;
     private CardType cardType;
-    private BigDecimal chargedAmmount;
+    private BigDecimal chargedAmount;
     private BigDecimal fee;
 }

@@ -1,8 +1,6 @@
 package com.banco.services;
 
 import com.banco.entities.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +8,7 @@ import java.util.*;
 
 import com.banco.repositories.EntityRepository;
 import com.banco.utils.EntityUtils;
+import com.banco.dtos.CardDto;
 import com.banco.dtos.TransactionVerificationDto;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.CardRepository;
@@ -20,7 +19,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CardServiceImpl implements CardService {
 
-    @Autowired
     private CardRepository cardRepository;
     private final PasswordEncoder passwordEncoder;
     private final EntityRepository entityRepository;
@@ -47,5 +45,28 @@ public class CardServiceImpl implements CardService {
             // RETURN CARD INFO
 
         }
+    }
+    
+    @Override
+    public List<CardDto> getUserCards() throws CustomException{
+        Entity user = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        List<Card> cardList = cardRepository.findAllCardsFromEntityTaxId(user.getTaxId());
+        List<CardDto> cardDtoList = new ArrayList<>();
+        for(Card card : cardList) {
+            CardDto cardDto = CardDto.builder()
+                .id(card.getId())
+                .number(card.getNumber())
+                .expiration(card.getExpiration())
+                .cashierLimit(card.getCashierLimit())
+                .dailyBuyoutLimit(card.getDailyBuyoutLimit())
+                .activated(card.getActivated())
+                .activationDate(card.getActivationDate())
+                .cardType(card.getCardType())
+                .chargedAmount(card.getChargedAmount())
+                .fee(card.getFee())
+                .build();
+            cardDtoList.add(cardDto);
+        }
+        return cardDtoList;
     }
 }
