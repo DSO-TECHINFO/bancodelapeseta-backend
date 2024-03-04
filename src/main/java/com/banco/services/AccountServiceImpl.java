@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService{
     @Override
     public List<EntityContract> getAccounts() throws CustomException {
 
-        return entityRepository.findByTaxId(entityUtils.checkIfEntityExists(entityUtils.extractUser()).getTaxId()).orElseThrow()
+        return entityUtils.checkIfEntityExists(entityUtils.extractUser())
                 .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT).collect(Collectors.toList());
 
     }
