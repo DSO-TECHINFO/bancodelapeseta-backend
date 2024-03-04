@@ -36,7 +36,7 @@ public class Contract {
     @JsonIgnore
     @OneToMany(mappedBy = "contract")
     private List<EntityContract> entityContract;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Account account;
