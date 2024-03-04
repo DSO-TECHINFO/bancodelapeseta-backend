@@ -42,6 +42,6 @@ public class Account {
     private Currency currency;
 
     @JsonIgnore
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
     private Contract contract;
 }
