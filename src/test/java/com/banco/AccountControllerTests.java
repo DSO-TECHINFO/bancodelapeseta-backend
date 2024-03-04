@@ -4,6 +4,7 @@ import com.banco.dtos.CreateNewAccountDto;
 import com.banco.dtos.PasswordChangeDto;
 import com.banco.dtos.PhoneChangeDto;
 import com.banco.entities.Entity;
+import com.banco.entities.EntityType;
 import com.banco.repositories.EntityRepository;
 import com.banco.security.JwtService;
 import com.banco.services.VerifyService;
@@ -94,6 +95,7 @@ public class AccountControllerTests {
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .verifyWithSign(true)
+                        .type(EntityType.PHYSICAL)
                         .verifyTransactionCode(passwordEncoder.encode(mockedCode))
                         .verifyTransactionCodeAttempts(0)
                         .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
