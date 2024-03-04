@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,10 +15,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -28,9 +25,7 @@ import com.banco.entities.Entity;
 import com.banco.repositories.CardRepository;
 import com.banco.repositories.EntityRepository;
 import com.banco.security.JwtService;
-import com.banco.utils.EntityUtils;
-
-import jakarta.transaction.Transactional;
+import com.banco.services.CardService;
 
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
@@ -45,17 +40,14 @@ class CardControllerTests {
     @MockBean
     private CardRepository cardRepository;
     @MockBean
-    private EntityUtils entityUtils;
+    private EntityRepository entityRepository;
 
     
     @Test
     @WithMockUser
-    @Transactional
     void testCardListEmptyOk() throws Exception {
-
-        when(entityUtils.extractUser())
-        .thenReturn(Optional.of(Entity.builder()
-                        .taxId("TESTID")
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .build()));
@@ -65,12 +57,19 @@ class CardControllerTests {
         mockMvc.perform(MockMvcRequestBuilders
                     .get("/card")
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))) 
-                // .andExpect(MockMvcResultMatchers.content().string("[]"))
+                .andExpect(MockMvcResultMatchers.content().string("[]"))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
+    @WithMockUser
     void testCardListOk() throws Exception {
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .build()));
+
         List<Card> mockCards = new ArrayList<>();
         mockCards.add(Card.builder()
                 .number("1234 5678 9012")
@@ -84,22 +83,13 @@ class CardControllerTests {
         mockCards.add(Card.builder()
                 .number("3456 7890 1234")
                 .build());
-        when(entityUtils.extractUser())
-                .thenReturn(Optional.of(Entity.builder()
-                                .taxId("TESTID")
-                                .emailConfirmed(true)
-                                .phoneConfirmed(true)
-                                .build()));
         when(cardRepository.findAllCardsFromEntityTaxId(any())).thenReturn(mockCards);
         
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                    .post("/card")
+        mockMvc.perform(MockMvcRequestBuilders
+                    .get("/card")
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
-                // .andExpect(MockMvcResultMatchers.content().string("1234 5678 9012"))
+                .andExpect(MockMvcResultMatchers.content().json(TestUtils.asJsonString(CardService.cardListToCardDtoList(mockCards))))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-        
-        String content = mvcResult.getResponse().getContentAsString();
-        Assertions.assertEquals(TestUtils.asJsonString(mockCards),content);
     }
 }
