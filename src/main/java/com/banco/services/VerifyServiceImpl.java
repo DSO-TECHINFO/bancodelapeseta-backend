@@ -195,7 +195,7 @@ public class VerifyServiceImpl implements VerifyService{
         if(entity.getVerifyTransactionCodeExpiration().before(new Date()))
             throw new CustomException("VERIFICATIONS-024", "Transaction code expired, get a new code", 400);
         if(!passwordEncoder.matches(transactionCode, entity.getVerifyTransactionCode())) {
-            entity.setVerifyTransactionCode(entity.getVerifyTransactionCode() + 1);
+            entity.setVerifyTransactionCodeAttempts(entity.getVerifyTransactionCodeAttempts() + 1);
             entityRepository.save(entity);
             throw new CustomException("VERIFICATIONS-025", "Transaction code not valid, try again", 400);
         }
