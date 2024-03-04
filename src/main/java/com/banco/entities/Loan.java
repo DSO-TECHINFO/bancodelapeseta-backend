@@ -20,6 +20,6 @@ public class Loan {
     private Long id;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(mappedBy = "loan")
     private Contract contract;
 }

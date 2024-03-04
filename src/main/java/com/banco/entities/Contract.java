@@ -36,21 +36,24 @@ public class Contract {
     @JsonIgnore
     @OneToMany(mappedBy = "contract")
     private List<EntityContract> entityContract;
-    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Account account;
-    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Card card;
-    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Loan loan;
-    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Tpv tpv;
+    @JsonIgnore
+    @Column
+    private Boolean deactivated;
 
 }

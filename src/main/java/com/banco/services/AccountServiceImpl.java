@@ -48,9 +48,20 @@ public class AccountServiceImpl implements AccountService{
         if(product.getEntityType() != entity.getType())
             throw new CustomException("ACCOUNTS-003", "You cannot chose that product", 400);
         Account account = Account.builder().currency(currency).accountNumber("ES" + RandomStringUtils.randomNumeric(18)).balance(new BigDecimal(0)).real_balance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
-        Contract contract = Contract.builder().creationDate(new Date()).account(account).product(product).type(ContractType.ACCOUNT).build();
+        Contract contract = Contract.builder().creationDate(new Date()).account(account).product(product).deactivated(false).type(ContractType.ACCOUNT).build();
         account.setContract(contract);
         EntityContract entityContract = EntityContract.builder().entity(entity).contract(contract).role(EntityContractRole.OWNER).build();
         entityContractRepository.save(entityContract);
+    }
+
+    @Override
+    public void deactivateAccount(String accountNumber) throws CustomException {
+        Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        entity.getContracts().forEach(entityContract -> {
+            Account account = entityContract.getContract().getAccount();
+            if(account != null && account.getAccountNumber().equals(accountNumber)){
+                entityContract.getContract().setDeactivated(true);
+            }
+        });
     }
 }

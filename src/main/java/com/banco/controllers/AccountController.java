@@ -23,4 +23,10 @@ public class AccountController {
         accountService.createAccount(createNewAccountDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+    @DeleteMapping("/close/{accountNumber}")
+    public ResponseEntity<?> deactivateAccount(@PathVariable String accountNumber) throws CustomException {
+        accountService.deactivateAccount(accountNumber);
+        return ResponseEntity.noContent().build();
+
+    }
 }
