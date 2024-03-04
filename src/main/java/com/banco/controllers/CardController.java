@@ -2,13 +2,11 @@ package com.banco.controllers;
 
 import com.banco.dtos.CardDto;
 import com.banco.dtos.TransactionVerificationDto;
-import com.banco.entities.Card;
 import com.banco.exceptions.CustomException;
 import com.banco.services.CardService;
 
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -25,7 +23,7 @@ public class CardController {
 
     private final CardService cardService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<CardDto>> getAllCards() throws CustomException {
         List<CardDto> cardDtoList = cardService.getUserCards();
         return ResponseEntity.ok(cardDtoList);

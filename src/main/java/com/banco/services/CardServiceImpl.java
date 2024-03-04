@@ -48,7 +48,7 @@ public class CardServiceImpl implements CardService {
     }
     
     @Override
-    public List<CardDto> getUserCards() throws CustomException{
+    public List<CardDto> getUserCards() throws CustomException {
         Entity user = entityUtils.checkIfEntityExists(entityUtils.extractUser());
         List<Card> cardList = cardRepository.findAllCardsFromEntityTaxId(user.getTaxId());
         List<CardDto> cardDtoList = new ArrayList<>();
