@@ -11,7 +11,15 @@ import java.util.List;
 @Service
 public class CalculateAmortizationServiceImpl implements CalculateAmortizationService{
 
-
+    /**
+     * @param loan
+     * @return
+     * @throws IllegalArgumentException
+     *
+     * Calculates the Loan amortization using the French system.
+     *  a List of LoanPayment with the information of each payment.
+     * The attributes interestRate, loanAmount and loanNumberPayments cannot be zero.
+     */
     @Override
     public List<LoanPayment> calculateAmortization(Loan loan)  {
         loanParamsValidation(loan);
