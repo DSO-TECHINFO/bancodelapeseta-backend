@@ -11,12 +11,6 @@ import java.util.List;
 @Service
 public class CalculateAmortizationServiceImpl implements CalculateAmortizationService{
 
-    /**
-     * TODO: add divisor to the interest because we recieve it like percentaje but we need it as
-     * @param loan
-     * @return
-     * @throws IllegalArgumentException
-     */
 
     @Override
     public List<LoanPayment> calculateAmortization(Loan loan)  {
