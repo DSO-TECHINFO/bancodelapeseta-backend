@@ -19,6 +19,6 @@ public class Card {
     private Long id;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(mappedBy = "card")
     private Contract contract;
 }

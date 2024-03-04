@@ -11,4 +11,6 @@ public interface AccountService {
     public List<EntityContract> getAccounts() throws CustomException;
 
     void createAccount(CreateNewAccountDto createNewAccountDto) throws CustomException;
+
+    void deactivateAccount(String accountNumber) throws CustomException;
 }
