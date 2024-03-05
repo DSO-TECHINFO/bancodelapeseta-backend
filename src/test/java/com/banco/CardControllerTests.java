@@ -4,8 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -22,6 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.banco.dtos.CardCredentialsDto;
+import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.Card;
 import com.banco.entities.Contract;
 import com.banco.entities.ContractType;
@@ -45,6 +50,7 @@ class CardControllerTests {
     private EntityRepository entityRepository;
     @Autowired
     private CopyNonNullFields copyNonNullFields;
+    @Autowired PasswordEncoder passwordEncoder;
     
     @Test
     @WithMockUser
@@ -97,6 +103,7 @@ class CardControllerTests {
     @Test
     @WithMockUser
     void testCardCredentialsOk() throws Exception {
+        String mockedCode = "CODETEST";
         Card mockCard = Card.builder().number("1234 5678 9012").cvv("123").pin("1234").build();
         List<EntityContract> mockEntityContracts = new ArrayList<>();
         Contract mockContract = Contract.builder().card(mockCard).type(ContractType.CARD).build();
@@ -109,11 +116,15 @@ class CardControllerTests {
                         .contracts(mockEntityContracts)
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
+                        .verifyWithSign(true)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
                         .build()));
 
         mockMvc.perform(MockMvcRequestBuilders
                     .get("/card/credentials/1234 5678 9012")
-                    .content(TestUtils.asJsonString(mockCardCredentialsDto)).contentType(MediaType.APPLICATION_JSON)
+                    .content(TestUtils.asJsonString(VerificationCodeDto.builder().verificationCode(mockedCode).build())).contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
                 .andExpect(MockMvcResultMatchers.content().json(TestUtils.asJsonString(mockCardCredentialsDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
@@ -121,10 +132,32 @@ class CardControllerTests {
 
     @Test
     @WithMockUser
-    void testCardCredentialsFail() throws Exception {
+    void testCardCredentialsNotFoundFail() throws Exception {
+        String mockedCode = "CODETEST";
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
-                .contracts(new ArrayList<>())
+                        .contracts(new ArrayList<>())
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .verifyWithSign(true)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                    .get("/card/credentials/1234 5678 9012")
+                    .content(TestUtils.asJsonString(VerificationCodeDto.builder().verificationCode(mockedCode).build())).contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
+                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+    }
+
+    @Test
+    @WithMockUser
+    void testCardCredentialsWithoutBodyFail() throws Exception {
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .contracts(new ArrayList<>())
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .build()));
@@ -132,6 +165,7 @@ class CardControllerTests {
         mockMvc.perform(MockMvcRequestBuilders
                     .get("/card/credentials/1234 5678 9012")
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
-                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError()).andReturn();
     }
+    
 }
