@@ -7,10 +7,10 @@ import jakarta.transaction.Transactional;
 
 import java.io.IOException;
 
-
 public interface AuthenticationService {
 
-    AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request) throws CustomException, IOException;
+    AuthenticationResponseDto login(AuthenticationRequestDto authenticationRequestDto, HttpServletRequest request)
+            throws CustomException, IOException;
 
     @Transactional
     void registerPhysical(RegisterPhysicalDto registerPhysicalDto, HttpServletRequest request) throws CustomException;

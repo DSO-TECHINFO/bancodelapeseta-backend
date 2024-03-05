@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,6 +65,7 @@ public class AccountControllerTests {
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/accounts").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
+                .andExpect(MockMvcResultMatchers.content().json("[]"))
                 .andExpect(status().isOk());
     }
     @Test
