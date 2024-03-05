@@ -53,7 +53,7 @@ public class Card {
     private Date activationDate;
     
     @JsonIgnore
-    @OneToOne
+    @OneToOne(mappedBy = "card")
     private Contract contract;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

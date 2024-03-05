@@ -19,6 +19,6 @@ public class Tpv {
     private Long id;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(mappedBy = "tpv")
     private Contract contract;
 }
