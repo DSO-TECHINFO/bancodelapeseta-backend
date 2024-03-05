@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -105,13 +106,14 @@ class CardControllerTests {
 
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
-                .contracts(mockEntityContracts)
+                        .contracts(mockEntityContracts)
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .build()));
 
         mockMvc.perform(MockMvcRequestBuilders
                     .get("/card/credentials/1234 5678 9012")
+                    .content(TestUtils.asJsonString(mockCardCredentialsDto)).contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
                 .andExpect(MockMvcResultMatchers.content().json(TestUtils.asJsonString(mockCardCredentialsDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();

@@ -10,6 +10,7 @@ import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
 import com.banco.dtos.CardCredentialsDto;
 import com.banco.dtos.CardDto;
+import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.Card;
 import com.banco.entities.Contract;
 import com.banco.entities.ContractType;
@@ -27,6 +28,7 @@ public class CardServiceImpl implements CardService {
     private CardRepository cardRepository;
     private final EntityUtils entityUtils;
     private final CopyNonNullFields copyNonNullFields;
+    private final VerifyService verifyService;
     
     @Override
     public List<EntityContract> getUserCards() throws CustomException {
@@ -35,7 +37,8 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public CardCredentialsDto getCredentials(String cardNumber) throws CustomException {
+    public CardCredentialsDto getCredentials(String cardNumber, VerificationCodeDto verificationCodeDto) throws CustomException {
+        verifyService.verifyTransactionCode(verificationCodeDto.getVerificationCode(), true);
         List<EntityContract> contracts = getUserCards();
         Optional<Card> cardOptional = contracts.stream().map(EntityContract::getContract).map(Contract::getCard).filter(card -> card.getNumber().equals(cardNumber)).findFirst();
         if(cardOptional.isEmpty()) 
