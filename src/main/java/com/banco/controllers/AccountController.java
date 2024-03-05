@@ -1,6 +1,7 @@
 package com.banco.controllers;
 
 import com.banco.dtos.CreateNewAccountDto;
+import com.banco.dtos.VerificationCodeDto;
 import com.banco.exceptions.CustomException;
 import com.banco.services.AccountService;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,8 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @DeleteMapping("/close/{accountNumber}")
-    public ResponseEntity<?> deactivateAccount(@PathVariable String accountNumber) throws CustomException {
-        accountService.deactivateAccount(accountNumber);
+    public ResponseEntity<?> deactivateAccount(@PathVariable String accountNumber, @RequestBody VerificationCodeDto verificationCodeDto) throws CustomException {
+        accountService.deactivateAccount(accountNumber, verificationCodeDto);
         return ResponseEntity.noContent().build();
 
     }

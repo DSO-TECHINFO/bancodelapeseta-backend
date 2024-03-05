@@ -1,11 +1,10 @@
 package com.banco.services;
 
 import com.banco.dtos.CreateNewAccountDto;
+import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
-import com.banco.repositories.EntityContractRepository;
-import com.banco.repositories.EntityRepository;
-import com.banco.repositories.ProductRepository;
+import com.banco.repositories.*;
 import com.banco.utils.CurrencyUtils;
 import com.banco.utils.EntityUtils;
 import com.banco.utils.ProductUtils;
@@ -14,8 +13,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -27,11 +28,15 @@ public class AccountServiceImpl implements AccountService{
     private CurrencyUtils currencyUtils;
     private VerifyService verifyService;
     private EntityContractRepository entityContractRepository;
+    private AccountRepository accountRepository;
+    private TransferRepository transferRepository;
+    private ContractRepository contractRepository;
     @Override
     public List<EntityContract> getAccounts() throws CustomException {
 
         return entityUtils.checkIfEntityExists(entityUtils.extractUser())
-                .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT).collect(Collectors.toList());
+                .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT && !contract.getContract().getDeactivated())
+                .collect(Collectors.toList());
 
     }
 
@@ -55,13 +60,29 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
-    public void deactivateAccount(String accountNumber) throws CustomException {
+    public void deactivateAccount(String accountNumber, VerificationCodeDto verificationCode) throws CustomException {
         Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        verifyService.verifyTransactionCode(verificationCode.getVerificationCode(), true);
+        List<Contract> contractList = new ArrayList<>();
+        List<Transfer> transfers = transferRepository.findAllByPayerAccount(accountNumber);
+        Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         entity.getContracts().forEach(entityContract -> {
-            Account account = entityContract.getContract().getAccount();
-            if(account != null && account.getAccountNumber().equals(accountNumber)){
+            if(entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber)){
                 entityContract.getContract().setDeactivated(true);
+                contractList.add(entityContract.getContract());
             }
         });
+
+        if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.LOAN))
+            throw new CustomException("ACCOUNTS-004", "You cannot deactivate that account because there is a loan associated to it", 400);
+        if(account.isPresent() && account.get().getBalance().compareTo(new BigDecimal(0)) != 0 && account.get().getReal_balance().compareTo(new BigDecimal(0)) != 0)
+            throw new CustomException("ACCOUNTS-005", "You cannot deactivate that account, you have balance on it", 400);
+        if(transfers.stream().anyMatch(transfer -> transfer.getStatus() != TransferStatus.COMPLETED && transfer.getStatus() != TransferStatus.REJECTED))
+            throw new CustomException("ACCOUNTS-006", "You cannot deactivate that account, at least one transfer is not completed", 400);
+        if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.CARD /*TODO INCLUDE CARD TYPE EQUALS TO PREPAID AND PREPAID CARD BALANCE IS NOT ZERO */))
+            throw new CustomException("ACCOUNTS-007", "You cannot deactivate that account, your prepaid card must be empty", 400);
+        if(contractList.isEmpty())
+            throw new CustomException("ACCOUNTS-008", "Account not found", 404);
+        contractRepository.saveAll(contractList);
     }
 }
