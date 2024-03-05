@@ -18,7 +18,6 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "loans")
 public class Loan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -112,5 +111,7 @@ public class Loan {
     @Column
     private LoanType loanType;
 
-
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
+    private Integer loanNumberPayments;
 }

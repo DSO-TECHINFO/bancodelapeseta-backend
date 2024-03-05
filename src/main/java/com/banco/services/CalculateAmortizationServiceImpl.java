@@ -1,11 +1,13 @@
 package com.banco.services;
+import com.banco.entities.AmortizationPlan;
 import com.banco.entities.Loan;
-import com.banco.entities.LoanPayment;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 @Service
@@ -17,35 +19,38 @@ public class CalculateAmortizationServiceImpl implements CalculateAmortizationSe
      * @throws IllegalArgumentException
      *
      * Calculates the Loan amortization using the French system.
-     *  a List of LoanPayment with the information of each payment.
+     *  a List of AmortizationPlan with the information of each payment.
      * The attributes interestRate, loanAmount and loanNumberPayments cannot be zero.
      */
     @Override
-    public List<LoanPayment> calculateAmortization(Loan loan)  {
+    public List<AmortizationPlan> calculateAmortization(Loan loan)  {
         loanParamsValidation(loan);
-        List<LoanPayment> payments = new ArrayList<>();
+        List<AmortizationPlan> amortizationPlans = new ArrayList<>();
         BigDecimal remainingBalance = loan.getAmount();
         BigDecimal interestRate = loan.getInterestRate().divide(BigDecimal.valueOf(100));
         BigDecimal monthlyInterestRate = interestRate.divide(BigDecimal.valueOf(12), 7, RoundingMode.HALF_UP);
         int totalPayments = loan.getLoanNumberPayments();
         BigDecimal monthlyPayment = this.calculateMonthlyPayment(loan.getAmount(), monthlyInterestRate, totalPayments);
+        LocalDate actualDate = LocalDate.now();
+
 
         for(int i = 0; i < totalPayments; ++i) {
             BigDecimal interestPayment = remainingBalance.multiply(monthlyInterestRate);
             BigDecimal principalPayment = monthlyPayment.subtract(interestPayment);
             remainingBalance = remainingBalance.subtract(principalPayment);
-            LoanPayment payment = new LoanPayment();
-            payment.setPaymentNumber(i + 1);
-            payment.setPaymentAmount(monthlyPayment.setScale(2, RoundingMode.HALF_UP));
-            payment.setInterestPaid(interestPayment.setScale(2, RoundingMode.HALF_UP));
-            payment.setAmortization(principalPayment.setScale(2, RoundingMode.HALF_UP));
-            payment.setRemainingBalance(remainingBalance.setScale(2, RoundingMode.HALF_UP));
+            AmortizationPlan amortizationPlan = new AmortizationPlan();
+            amortizationPlan.setRate(monthlyInterestRate);
+            amortizationPlan.setInterests(interestPayment.setScale(2, RoundingMode.HALF_UP));
+            amortizationPlan.setAmortCap(principalPayment.setScale(2, RoundingMode.HALF_UP));
+            amortizationPlan.setPendingCapital(remainingBalance.setScale(2, RoundingMode.HALF_UP));
+            amortizationPlan.setDate(Date.valueOf(actualDate.plusMonths(i)));
+            amortizationPlan.setLoan(loan);
 
 
-            payments.add(payment);
+            amortizationPlans.add(amortizationPlan);
         }
 
-        return payments;
+        return amortizationPlans;
     }
 
     @Override
