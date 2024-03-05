@@ -32,7 +32,7 @@ public class Card {
     @Column
     private String expiration;
     
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private String cvv;
 
@@ -64,7 +64,7 @@ public class Card {
     @Column(precision = 10, scale = 2)
     private BigDecimal chargedAmount;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private String pin;
 
