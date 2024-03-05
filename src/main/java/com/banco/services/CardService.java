@@ -5,10 +5,11 @@ import java.util.List;
 
 import com.banco.dtos.CardDto;
 import com.banco.entities.Card;
+import com.banco.entities.EntityContract;
 import com.banco.exceptions.CustomException;
 
 public interface CardService {
-    List<CardDto> getUserCards() throws CustomException; 
+    List<EntityContract> getUserCards() throws CustomException; 
 
     static List<CardDto> cardListToCardDtoList(List<Card> cardList) {
         List<CardDto> cardDtoList = new ArrayList<>();

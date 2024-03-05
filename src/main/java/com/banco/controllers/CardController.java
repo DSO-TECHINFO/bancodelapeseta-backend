@@ -1,6 +1,6 @@
 package com.banco.controllers;
 
-import com.banco.dtos.CardDto;
+import com.banco.entities.EntityContract;
 import com.banco.exceptions.CustomException;
 import com.banco.services.CardService;
 
@@ -21,8 +21,8 @@ public class CardController {
     private final CardService cardService;
 
     @GetMapping
-    public ResponseEntity<List<CardDto>> getAllCards() throws CustomException {
-        List<CardDto> cardDtoList = cardService.getUserCards();
+    public ResponseEntity<List<EntityContract>> getAllCards() throws CustomException {
+        List<EntityContract> cardDtoList = cardService.getUserCards();
         return ResponseEntity.ok(cardDtoList);
     }
 }

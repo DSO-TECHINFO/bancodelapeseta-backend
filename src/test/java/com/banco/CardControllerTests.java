@@ -94,7 +94,7 @@ class CardControllerTests {
         mockMvc.perform(MockMvcRequestBuilders
                     .get("/card")
                     .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
-                .andExpect(MockMvcResultMatchers.content().json(TestUtils.asJsonString(CardService.cardListToCardDtoList(mockCards))))
+                .andExpect(MockMvcResultMatchers.content().json(TestUtils.asJsonString(mockEntityContracts)))
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
     }
 }
