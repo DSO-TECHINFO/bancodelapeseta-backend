@@ -2,6 +2,7 @@ package com.banco.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -25,28 +26,34 @@ public class Contract {
     private Long id;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private String type;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private ContractType type;
+    @JsonIgnore
     @Column
     private Date creationDate;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToOne
     private Product product;
     @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "entity_contract", joinColumns = @JoinColumn(name = "contract_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "entity_id", referencedColumnName = "id"))
-    private List<com.banco.entities.Entity> entities;
     @OneToMany(mappedBy = "contract")
+    private List<EntityContract> entityContract;
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<Account> accounts;
-    @OneToMany(mappedBy = "contract")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Account account;
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<Card> cards;
-    @OneToMany(mappedBy = "contract")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Card card;
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<Loan> loans;
-    @OneToMany(mappedBy = "contract")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Loan loan;
+    @OneToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<Tpv> tpvs;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Tpv tpv;
+    @JsonIgnore
+    @Column
+    private Boolean deactivated;
 
 }

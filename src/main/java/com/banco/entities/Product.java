@@ -41,4 +41,8 @@ public class Product {
     private ProductRecurrenceType recurrence;
     @OneToOne
     private Currency currency;
+    @Column
+    private BigDecimal interestRate;
+    @Column
+    private Boolean active;
 }

@@ -18,13 +18,14 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "loans")
 public class Loan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonIgnore
-    @ManyToOne
+    @OneToOne(mappedBy = "loan")
     private Contract contract;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

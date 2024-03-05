@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
-@Builder
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VerificationCodeReturnDto {
-    private String verificationCode;
-    private Date expirationDate;
+public class CardCredentialsDto {
+    private String cvv;
+    private String expiration;
 }

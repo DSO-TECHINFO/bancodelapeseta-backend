@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Service
-public class NonNullFields {
+public class CopyNonNullFields {
     public void copyNonNullProperties(Object src, Object target, boolean nonNullPropertiesFlag) throws CustomException {
 
         BeanUtils.copyProperties(src, target, getNullPropertyNames(src, nonNullPropertiesFlag));
