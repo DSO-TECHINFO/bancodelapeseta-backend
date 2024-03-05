@@ -12,8 +12,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.*;
 
 @jakarta.persistence.Entity
@@ -29,7 +27,6 @@ public class Entity implements UserDetails {
     @Id
     @Column
     private Long id;
-
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
@@ -167,7 +164,7 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private EntityDebtType debtType; //TODO implement class EntityDebtType
+    private EntityDebtType debtType; // TODO implement class EntityDebtType
 
     @JsonIgnore
     @Column
@@ -257,36 +254,57 @@ public class Entity implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Entity entity = (Entity) o;
 
-        if (!Objects.equals(id, entity.id)) return false;
-        if (!Objects.equals(address, entity.address)) return false;
-        if (!Objects.equals(addressCountry, entity.addressCountry)) return false;
-        if (!Objects.equals(addressCity, entity.addressCity)) return false;
-        if (!Objects.equals(postalCode, entity.postalCode)) return false;
-        if (!Objects.equals(gender, entity.gender)) return false;
-        if (!Objects.equals(nationality, entity.nationality)) return false;
-        if (!Objects.equals(birthCity, entity.birthCity)) return false;
-        if (!Objects.equals(birthday, entity.birthday)) return false;
-        if (!Objects.equals(email, entity.email)) return false;
-        if (!Objects.equals(type, entity.type)) return false;
-        if (!Objects.equals(phoneNumber, entity.phoneNumber)) return false;
-        if (!Objects.equals(name, entity.name)) return false;
-        if (!Objects.equals(surname, entity.surname)) return false;
-        if (!Objects.equals(password, entity.password)) return false;
-        if (!Objects.equals(locked, entity.locked)) return false;
+        if (!Objects.equals(id, entity.id))
+            return false;
+        if (!Objects.equals(address, entity.address))
+            return false;
+        if (!Objects.equals(addressCountry, entity.addressCountry))
+            return false;
+        if (!Objects.equals(addressCity, entity.addressCity))
+            return false;
+        if (!Objects.equals(postalCode, entity.postalCode))
+            return false;
+        if (!Objects.equals(gender, entity.gender))
+            return false;
+        if (!Objects.equals(nationality, entity.nationality))
+            return false;
+        if (!Objects.equals(birthCity, entity.birthCity))
+            return false;
+        if (!Objects.equals(birthday, entity.birthday))
+            return false;
+        if (!Objects.equals(email, entity.email))
+            return false;
+        if (!Objects.equals(type, entity.type))
+            return false;
+        if (!Objects.equals(phoneNumber, entity.phoneNumber))
+            return false;
+        if (!Objects.equals(name, entity.name))
+            return false;
+        if (!Objects.equals(surname, entity.surname))
+            return false;
+        if (!Objects.equals(password, entity.password))
+            return false;
+        if (!Objects.equals(locked, entity.locked))
+            return false;
         if (!Objects.equals(emailConfirmed, entity.emailConfirmed))
             return false;
         if (!Objects.equals(emailConfirmationCode, entity.emailConfirmationCode))
             return false;
         if (!Objects.equals(emailConfirmationCodeExpiration, entity.emailConfirmationCodeExpiration))
             return false;
-        if (!Objects.equals(taxId, entity.taxId)) return false;
-        if (!Objects.equals(sign, entity.sign)) return false;
-        if (!Objects.equals(signActivated, entity.signActivated)) return false;
+        if (!Objects.equals(taxId, entity.taxId))
+            return false;
+        if (!Objects.equals(sign, entity.sign))
+            return false;
+        if (!Objects.equals(signActivated, entity.signActivated))
+            return false;
         if (!Objects.equals(emailChangeCode, entity.emailChangeCode))
             return false;
         return Objects.equals(passwordChangeCode, entity.passwordChangeCode);
@@ -306,7 +324,8 @@ public class Entity implements UserDetails {
         result = 31 * result + (loginAttempts != null ? loginAttempts.hashCode() : 0);
         result = 31 * result + (emailConfirmed != null ? emailConfirmed.hashCode() : 0);
         result = 31 * result + (emailConfirmationCode != null ? emailConfirmationCode.hashCode() : 0);
-        result = 31 * result + (emailConfirmationCodeExpiration != null ? emailConfirmationCodeExpiration.hashCode() : 0);
+        result = 31 * result
+                + (emailConfirmationCodeExpiration != null ? emailConfirmationCodeExpiration.hashCode() : 0);
         result = 31 * result + (sign != null ? sign.hashCode() : 0);
         result = 31 * result + (signActivated != null ? signActivated.hashCode() : 0);
         result = 31 * result + (emailChangeCode != null ? emailChangeCode.hashCode() : 0);
