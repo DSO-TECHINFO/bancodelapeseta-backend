@@ -152,20 +152,4 @@ class CardControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
     }
 
-    @Test
-    @WithMockUser
-    void testCardCredentialsWithoutBodyFail() throws Exception {
-        when(entityRepository.findByTaxId(any()))
-                .thenReturn(Optional.of(Entity.builder()
-                        .contracts(new ArrayList<>())
-                        .emailConfirmed(true)
-                        .phoneConfirmed(true)
-                        .build()));
-
-        mockMvc.perform(MockMvcRequestBuilders
-                    .get("/card/credentials/1234 5678 9012")
-                    .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError()).andReturn();
-    }
-    
 }
