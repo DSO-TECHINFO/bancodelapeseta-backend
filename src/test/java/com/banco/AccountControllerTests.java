@@ -3,8 +3,7 @@ package com.banco;
 import com.banco.dtos.CreateNewAccountDto;
 import com.banco.dtos.PasswordChangeDto;
 import com.banco.dtos.PhoneChangeDto;
-import com.banco.entities.Entity;
-import com.banco.entities.EntityType;
+import com.banco.entities.*;
 import com.banco.repositories.EntityRepository;
 import com.banco.security.JwtService;
 import com.banco.services.VerifyService;
@@ -27,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -97,6 +97,31 @@ public class AccountControllerTests {
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .verifyWithSign(true)
+                        .type(EntityType.PHYSICAL)
+                        .verifyTransactionCode(passwordEncoder.encode(mockedCode))
+                        .verifyTransactionCodeAttempts(0)
+                        .verifyTransactionCodeExpiration(new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)))
+                        .build()));
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/accounts/create").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(CreateNewAccountDto.builder().currency("EUR").productId(2L).verificationCode(mockedCode).build()))
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity())))
+                .andExpect(status().isCreated());
+    }
+    @Test
+    @WithMockUser
+    @Transactional
+    public void testCloseAccountTestIsOk() throws Exception {
+        String mockedCode = "CODETEST";
+        when(entityRepository.findByTaxId(any()))
+                .thenReturn(Optional.of(Entity.builder()
+                        .id(18L)
+                        .emailConfirmed(true)
+                        .phoneConfirmed(true)
+                        .verifyWithSign(true)
+                        .contracts(List.of(EntityContract.builder().contract(Contract.builder().deactivated(false).type(ContractType.ACCOUNT).creationDate(new Date()).account(Account.builder().build()).build()).build()))
                         .type(EntityType.PHYSICAL)
                         .verifyTransactionCode(passwordEncoder.encode(mockedCode))
                         .verifyTransactionCodeAttempts(0)

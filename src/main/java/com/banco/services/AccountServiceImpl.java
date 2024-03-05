@@ -1,6 +1,7 @@
 package com.banco.services;
 
 import com.banco.dtos.CreateNewAccountDto;
+import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.*;
@@ -34,7 +35,8 @@ public class AccountServiceImpl implements AccountService{
     public List<EntityContract> getAccounts() throws CustomException {
 
         return entityUtils.checkIfEntityExists(entityUtils.extractUser())
-                .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT).collect(Collectors.toList());
+                .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT && !contract.getContract().getDeactivated())
+                .collect(Collectors.toList());
 
     }
 
@@ -58,16 +60,19 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
-    public void deactivateAccount(String accountNumber) throws CustomException {
+    public void deactivateAccount(String accountNumber, VerificationCodeDto verificationCode) throws CustomException {
         Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        verifyService.verifyTransactionCode(verificationCode.getVerificationCode(), true);
         List<Contract> contractList = new ArrayList<>();
         List<Transfer> transfers = transferRepository.findAllByPayerAccount(accountNumber);
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         entity.getContracts().forEach(entityContract -> {
             if(entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber)){
+                entityContract.getContract().setDeactivated(true);
                 contractList.add(entityContract.getContract());
             }
         });
+
         if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.LOAN))
             throw new CustomException("ACCOUNTS-004", "You cannot deactivate that account because there is a loan associated to it", 400);
         if(account.isPresent() && account.get().getBalance().compareTo(new BigDecimal(0)) != 0 && account.get().getReal_balance().compareTo(new BigDecimal(0)) != 0)
@@ -76,9 +81,8 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-006", "You cannot deactivate that account, at least one transfer is not completed", 400);
         if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.CARD /*TODO INCLUDE CARD TYPE EQUALS TO PREPAID AND PREPAID CARD BALANCE IS NOT ZERO */))
             throw new CustomException("ACCOUNTS-007", "You cannot deactivate that account, your prepaid card must be empty", 400);
-        contractList.forEach(contract -> {
-            contract.setDeactivated(true);
-        });
+        if(contractList.isEmpty())
+            throw new CustomException("ACCOUNTS-008", "Account not found", 404);
         contractRepository.saveAll(contractList);
     }
 }
