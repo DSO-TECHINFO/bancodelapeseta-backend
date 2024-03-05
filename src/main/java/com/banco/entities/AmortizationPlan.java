@@ -20,7 +20,6 @@ import java.util.Date;
 public class AmortizationPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column
     private Long id;
 
     @Column
@@ -39,7 +38,6 @@ public class AmortizationPlan {
     @Column
     private BigDecimal pendingCapital;
 
-    @Column
     @OneToOne
     private Loan loan;
 
