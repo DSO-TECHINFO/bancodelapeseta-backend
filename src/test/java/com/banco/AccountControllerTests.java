@@ -125,7 +125,7 @@ public class AccountControllerTests {
                         .emailConfirmed(true)
                         .phoneConfirmed(true)
                         .verifyWithSign(true)
-                        .contracts(List.of(EntityContract.builder().contract(
+                        .contracts(List.of(EntityContract.builder().role(EntityContractRole.OWNER).contract(
                                 Contract.builder().deactivated(false).type(ContractType.ACCOUNT).creationDate(new Date()).account(
                                         Account.builder().locked(false).accountNumber("TEST").build())
                                         .build())
