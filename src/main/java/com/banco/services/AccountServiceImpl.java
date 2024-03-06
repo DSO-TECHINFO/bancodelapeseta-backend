@@ -67,6 +67,8 @@ public class AccountServiceImpl implements AccountService{
         List<Transfer> transfers = transferRepository.findAllByPayerAccount(accountNumber);
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         entity.getContracts().forEach(entityContract -> {
+            if(entityContract.getRole() != EntityContractRole.OWNER && entityContract.getContract().getType() == ContractType.ACCOUNT && entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber))
+                throw new CustomException("ACCOUNTS-009", "You cannot do that, you must be the owner of the account to delete it.", 400);
             if(entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber)){
                 entityContract.getContract().setDeactivated(true);
                 contractList.add(entityContract.getContract());

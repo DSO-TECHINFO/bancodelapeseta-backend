@@ -35,7 +35,7 @@ public class AWSConfig {
     public AmazonS3 s3Client() {
         AWSCredentials credentials = new BasicAWSCredentials(accessMailingKey, accessSecret);
         return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(region).build();
+                .withRegion(Regions.US_EAST_1).build();
     }
 
     @Bean
@@ -57,6 +57,6 @@ public class AWSConfig {
             public String secretAccessKey() {
                 return accessMailingSecret;
             }
-        }).region(Region.US_EAST_1).build();
+        }).region(Region.EU_WEST_1).build();
     }
 }
