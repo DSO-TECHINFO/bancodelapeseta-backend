@@ -1,16 +1,22 @@
-package com.banco.utils;
+package com.banco.security;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.Base64;
 
+import lombok.Data;
+
+import java.util.Base64;
+@Data
 @Service
-public class AesUtils {
+public class AesService {
     private static final String AES_ALGORITHM = "AES";
-    @Value("${aes.secret}")
-    private static String ENCRYPTION_KEY; 
+    private final String ENCRYPTION_KEY;
+
+    public AesService(@Value("${aes.secret}") String ENCRYPTION_KEY) {
+        this.ENCRYPTION_KEY = ENCRYPTION_KEY;
+    }
 
     public String encrypt(String plainText) throws Exception {
         SecretKeySpec keySpec = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), AES_ALGORITHM);
