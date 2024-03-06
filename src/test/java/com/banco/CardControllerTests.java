@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -33,6 +32,7 @@ import com.banco.entities.ContractType;
 import com.banco.entities.Entity;
 import com.banco.entities.EntityContract;
 import com.banco.repositories.EntityRepository;
+import com.banco.security.AesService;
 import com.banco.security.JwtService;
 import com.banco.utils.CopyNonNullFields;
 
@@ -50,7 +50,10 @@ class CardControllerTests {
     private EntityRepository entityRepository;
     @Autowired
     private CopyNonNullFields copyNonNullFields;
-    @Autowired PasswordEncoder passwordEncoder;
+    @Autowired 
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    AesService aesService;
     
     @Test
     @WithMockUser
@@ -104,12 +107,15 @@ class CardControllerTests {
     @WithMockUser
     void testCardCredentialsOk() throws Exception {
         String mockedCode = "CODETEST";
-        Card mockCard = Card.builder().number("1234 5678 9012").cvv("123").pin("1234").build();
+        String cvv = "123";
+        String pin = "1234";
+        Card mockCardRequest = Card.builder().number("1234 5678 9012").cvv(aesService.encrypt(cvv)).pin(aesService.encrypt(pin)).build();
         List<EntityContract> mockEntityContracts = new ArrayList<>();
-        Contract mockContract = Contract.builder().card(mockCard).type(ContractType.CARD).build();
+        Contract mockContract = Contract.builder().card(mockCardRequest).type(ContractType.CARD).build();
         mockEntityContracts.add(EntityContract.builder().contract(mockContract).build());
         CardCredentialsDto mockCardCredentialsDto = new CardCredentialsDto();
-        copyNonNullFields.copyNonNullProperties(mockCard, mockCardCredentialsDto, false);
+        Card mockCardResponse = Card.builder().number("1234 5678 9012").cvv(cvv).pin(pin).build();
+        copyNonNullFields.copyNonNullProperties(mockCardResponse, mockCardCredentialsDto, false);
 
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()

@@ -18,6 +18,7 @@ import com.banco.entities.Entity;
 import com.banco.entities.EntityContract;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.CardRepository;
+import com.banco.security.AesService;
 
 import lombok.AllArgsConstructor;
 
@@ -29,6 +30,7 @@ public class CardServiceImpl implements CardService {
     private final EntityUtils entityUtils;
     private final CopyNonNullFields copyNonNullFields;
     private final VerifyService verifyService;
+    private final AesService aesService;
     
     @Override
     public List<EntityContract> getUserCards() throws CustomException {
@@ -43,8 +45,15 @@ public class CardServiceImpl implements CardService {
         Optional<Card> cardOptional = contracts.stream().map(EntityContract::getContract).map(Contract::getCard).filter(card -> card.getNumber().equals(cardNumber)).findFirst();
         if(cardOptional.isEmpty()) 
             throw new CustomException("CARD-001", "Card not found", 404);
-        CardCredentialsDto cardCredentialsDto = new CardCredentialsDto();
-        copyNonNullFields.copyNonNullProperties(cardOptional.get(), cardCredentialsDto, false);
-        return cardCredentialsDto;
+        Card card = cardOptional.get();
+        try {
+            card.setCvv(aesService.decrypt(card.getCvv()));
+            card.setPin(aesService.decrypt(card.getPin()));
+            CardCredentialsDto cardCredentialsDto = new CardCredentialsDto();
+            copyNonNullFields.copyNonNullProperties(card, cardCredentialsDto, false);
+            return cardCredentialsDto;
+        } catch(Exception exception) {
+            throw new CustomException("CARD-050", "Something went wrong, please contact support", 500);
+        }
     }
 }
