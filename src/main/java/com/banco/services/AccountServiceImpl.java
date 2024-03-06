@@ -81,7 +81,7 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-005", "You cannot deactivate that account, you have balance on it", 400);
         if(transfers.stream().anyMatch(transfer -> transfer.getStatus() != TransferStatus.COMPLETED && transfer.getStatus() != TransferStatus.REJECTED))
             throw new CustomException("ACCOUNTS-006", "You cannot deactivate that account, at least one transfer is not completed", 400);
-        if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.CARD /*TODO INCLUDE CARD TYPE EQUALS TO PREPAID AND PREPAID CARD BALANCE IS NOT ZERO */))
+        if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.CARD && contract.getCard().getCardType() == CardType.PREPAID && contract.getCard().getChargedAmount().compareTo(new BigDecimal(0)) != 0))
             throw new CustomException("ACCOUNTS-007", "You cannot deactivate that account, your prepaid card must be empty", 400);
         if(contractList.isEmpty())
             throw new CustomException("ACCOUNTS-008", "Account not found", 404);
