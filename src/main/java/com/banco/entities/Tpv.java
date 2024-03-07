@@ -57,9 +57,10 @@ public class Tpv {
     private Date deactivationDate;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
     private Boolean activated;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "contractId")
+    @OneToOne
     private Contract contract;
 }
