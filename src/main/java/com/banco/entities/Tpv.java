@@ -61,6 +61,6 @@ public class Tpv {
     private Boolean activated;
 
     @JsonIgnore
-    @OneToOne
+    @OneToOne(mappedBy = "tpv")
     private Contract contract;
 }
