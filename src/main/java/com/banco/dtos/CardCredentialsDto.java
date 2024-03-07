@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CardCredentialsDto {
     private String cvv;
-    private String expiration;
+    private String pin;
 }
