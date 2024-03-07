@@ -16,7 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @Data
-@Table( name = "amortizationPlan")
+@Table( name = "amortization_plan")
 public class AmortizationPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
