@@ -1,7 +1,7 @@
 package com.banco.services;
 
-import java.math.BigDecimal;
+import com.banco.dtos.CurrencyExchangeDto;
 
 public interface CurrencyExchangeService {
-    BigDecimal getCurrencyExchangeRate(String currencyFrom, String currencyTo);
+    CurrencyExchangeDto getCurrencyExchangeRate(String currencyFrom);
 }
