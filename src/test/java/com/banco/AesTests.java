@@ -25,7 +25,7 @@ class AesTests {
     }
 
     @Test
-    void testAesDecrypt() throws Exception {
+    void testAesDecryptOk() throws Exception {
         String encryptedText = "yj+zNIgY2P/oRRyMppU+Yg==";
         String expectedPlainText = "PLAIN CODE TEST";
         String decryptedText = aesService.decrypt(encryptedText);
