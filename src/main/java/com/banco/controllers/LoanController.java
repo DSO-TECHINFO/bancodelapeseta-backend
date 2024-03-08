@@ -1,5 +1,6 @@
 package com.banco.controllers;
 
+import com.banco.dtos.LoanDto;
 import com.banco.entities.Loan;
 import com.banco.services.LoanServiceImpl;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ public class LoanController {
     LoanServiceImpl loanService;
 
     @GetMapping
-    public ResponseEntity<List<Loan>> getLoans(){
+    public ResponseEntity<List<LoanDto>> getLoans(){
         return ResponseEntity.ok(loanService.getLoans());
     }
 }
