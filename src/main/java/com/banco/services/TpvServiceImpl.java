@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 
 import com.banco.repositories.TpvRepository;
 
+import lombok.AllArgsConstructor;
+
 @Service
+@AllArgsConstructor
 public class TpvServiceImpl implements TpvService {
     
-    @Autowired
     private TpvRepository tpvRepository;
 }
