@@ -56,9 +56,9 @@ public class Contract {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Loan loan;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "contract")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     private Tpv tpv;
 
     @JsonIgnore

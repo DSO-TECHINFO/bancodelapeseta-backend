@@ -60,7 +60,7 @@ public class Tpv {
     @Column
     private Boolean activated;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "tpv")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @OneToOne(cascade = CascadeType.REFRESH)
     private Contract contract;
 }
