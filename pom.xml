@@ -107,6 +107,11 @@
             <artifactId>sns</artifactId>
             <version>2.24.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
