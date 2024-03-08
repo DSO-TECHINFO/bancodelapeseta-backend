@@ -30,6 +30,15 @@ public interface TpvService {
     void create(TpvDto tpv) throws CustomException;
 
     /**
+     * Method return payment
+     * Devuelve un pago efectuado
+     *
+     * @param idTransaction
+     * @throws CustomException
+     */
+    void returnPayment(Long idTransaction) throws CustomException;
+
+    /**
      * <h2>Method activate</h2>
      * <p>Activa el tpv recibido actualizando la fecha de activación.</p>
      * 

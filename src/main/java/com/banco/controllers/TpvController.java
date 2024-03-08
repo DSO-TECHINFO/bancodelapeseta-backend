@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * <h2>Controller TpvController</h2>
@@ -26,6 +27,12 @@ public class TpvController {
     public ResponseEntity<?> createTpv(@RequestBody TpvDto tpvDto){
         tpvService.create(tpvDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/return/{idTransaction}")
+    public ResponseEntity<?> getMethodName(@PathVariable Long idTransaction) {
+        tpvService.returnPayment(idTransaction);
+        return ResponseEntity.ok().build();
     }
     
     @GetMapping("activate/{id}")

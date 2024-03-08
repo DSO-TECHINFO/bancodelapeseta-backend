@@ -7,6 +7,8 @@ import com.banco.mappers.TpvMapper;
 import com.banco.repositories.EntityRepository;
 import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
+
+import org.hibernate.type.CustomType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,11 @@ public class TpvServiceImpl implements TpvService {
         Tpv tpv = new Tpv();
         mapperService.copyNonNullProperties(dto, tpv, true);
         tpvRepository.save(tpv);
+    }
+
+    @Override
+    public void returnPayment(Long idTransaction) throws CustomException {
+
     }
 
     @Override
