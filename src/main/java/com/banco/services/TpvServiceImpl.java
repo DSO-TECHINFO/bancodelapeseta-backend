@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.banco.dtos.TpvDto;
 import com.banco.entities.Tpv;
-
+import com.banco.entities.TpvTransactions;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.TpvRepository;
+import com.banco.repositories.TpvTransactionsRepository;
+
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 
@@ -30,6 +32,7 @@ import lombok.AllArgsConstructor;
 public class TpvServiceImpl implements TpvService {
 
     private final TpvRepository tpvRepository;
+    private final TpvTransactionsRepository tpvTransactionsRepository;
     private final CopyNonNullFields mapperService;
     private final EntityUtils entityUtils;
 
@@ -55,7 +58,10 @@ public class TpvServiceImpl implements TpvService {
 
     @Override
     public void returnPayment(Long idTransaction) throws CustomException {
-
+        TpvTransactions tpvTransaction = tpvTransactionsRepository.findById(idTransaction)
+            .orElseThrow( () ->
+                new CustomException("NOT_FOUND", "No se ha encontrado esta transaccion", 404)
+            );
     }
 
     @Override

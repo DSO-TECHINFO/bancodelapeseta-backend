@@ -1,6 +1,7 @@
 package com.banco.controllers;
 
 import com.banco.dtos.TpvDto;
+import com.banco.exceptions.CustomException;
 import com.banco.services.TpvService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class TpvController {
     }
 
     @GetMapping("/return/{idTransaction}")
-    public ResponseEntity<?> getMethodName(@PathVariable Long idTransaction) {
+    public ResponseEntity<?> returnPayment(@PathVariable Long idTransaction) throws CustomException {
         tpvService.returnPayment(idTransaction);
         return ResponseEntity.ok().build();
     }

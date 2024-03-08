@@ -1,5 +1,6 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
@@ -30,5 +31,10 @@ public class TpvTransactions {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private BigInteger transactionNumber;
+
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
+    private String card;
 
 }
