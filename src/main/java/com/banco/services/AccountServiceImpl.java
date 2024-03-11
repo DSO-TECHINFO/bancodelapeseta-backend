@@ -5,11 +5,13 @@ import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
 import com.banco.repositories.*;
+import com.banco.utils.AccountUtils;
 import com.banco.utils.CurrencyUtils;
 import com.banco.utils.EntityUtils;
 import com.banco.utils.ProductUtils;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -31,6 +33,10 @@ public class AccountServiceImpl implements AccountService{
     private AccountRepository accountRepository;
     private TransferRepository transferRepository;
     private ContractRepository contractRepository;
+    private AccountUtils accountUtils;
+
+
+
     @Override
     public List<EntityContract> getAccounts() throws CustomException {
 
@@ -52,7 +58,7 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-002", "This product is not eligible to create an account", 400);
         if(product.getEntityType() != entity.getType())
             throw new CustomException("ACCOUNTS-003", "You cannot chose that product", 400);
-        Account account = Account.builder().currency(currency).accountNumber("ES" + RandomStringUtils.randomNumeric(18)).balance(new BigDecimal(0)).real_balance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
+        Account account = Account.builder().currency(currency).accountNumber(accountUtils.createAccountNumber()).balance(new BigDecimal(0)).real_balance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
         Contract contract = Contract.builder().creationDate(new Date()).account(account).product(product).deactivated(false).type(ContractType.ACCOUNT).build();
         account.setContract(contract);
         EntityContract entityContract = EntityContract.builder().entity(entity).contract(contract).role(EntityContractRole.OWNER).build();
@@ -68,9 +74,10 @@ public class AccountServiceImpl implements AccountService{
         Optional<Account> account = accountRepository.findByAccountNumber(accountNumber);
         entity.getContracts().forEach(entityContract -> {
             if(entityContract.getRole() != EntityContractRole.OWNER && entityContract.getContract().getType() == ContractType.ACCOUNT && entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber))
-                throw new CustomException("ACCOUNTS-009", "You cannot do that, you must be the owner of the account to delete it.", 400);
+                throw new CustomException("ACCOUNTS-009", "You cannot do that, you must be the owner of the account to delete it", 400);
             if(entityContract.getContract().getAccount().getAccountNumber().equals(accountNumber)){
                 entityContract.getContract().setDeactivated(true);
+                entityContract.getContract().getAccount().setLocked(true);
                 contractList.add(entityContract.getContract());
             }
         });
@@ -85,6 +92,9 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-007", "You cannot deactivate that account, your prepaid card must be empty", 400);
         if(contractList.isEmpty())
             throw new CustomException("ACCOUNTS-008", "Account not found", 404);
+
         contractRepository.saveAll(contractList);
     }
+
+
 }
