@@ -17,8 +17,6 @@ public class CurrencyUtils {
         return currencyRepository.findByCurrency(currency);
     }
     public Currency checkCurrency(Optional<Currency> currency) throws CustomException {
-        if(currency.isEmpty())
-            throw new CustomException("CURRENCY-001", "Currency not found", 404);
-        return currency.get();
+        return currency.orElseThrow(()->new CustomException("CURRENCY-001", "Currency not found", 404));
     }
 }
