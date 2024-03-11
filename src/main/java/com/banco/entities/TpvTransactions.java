@@ -30,11 +30,11 @@ public class TpvTransactions {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private BigInteger transactionNumber;
+    private String transactionNumber;
 
     @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private String card;
+    private Card card1;
 
 }
