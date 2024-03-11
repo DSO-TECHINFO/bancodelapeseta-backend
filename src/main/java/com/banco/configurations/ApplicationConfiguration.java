@@ -57,8 +57,8 @@ public class ApplicationConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-
-    public WebMvcConfigurer corsConfig() { //TODO IMPLEMENT NOTATION @BEAN TO ACTIVATE AGAIN
+    @Bean
+    public WebMvcConfigurer corsConfig() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
