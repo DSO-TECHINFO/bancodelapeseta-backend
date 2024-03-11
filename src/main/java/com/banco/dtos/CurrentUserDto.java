@@ -41,6 +41,8 @@ public class CurrentUserDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String addressTown;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private EntityDebtType debtType;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String addressCity;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String addressCountry;

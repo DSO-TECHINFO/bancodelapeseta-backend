@@ -164,7 +164,7 @@ public class Entity implements UserDetails {
 
     @JsonIgnore
     @Column
-    private EntityDebtType debtType; // TODO implement class EntityDebtType
+    private EntityDebtType debtType;
 
     @JsonIgnore
     @Column
