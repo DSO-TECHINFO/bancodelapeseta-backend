@@ -1,5 +1,6 @@
 package com.banco.services;
 
+import com.banco.dtos.AddIntervenerToAccountDto;
 import com.banco.dtos.CreateNewAccountDto;
 import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.*;
@@ -96,5 +97,23 @@ public class AccountServiceImpl implements AccountService{
         contractRepository.saveAll(contractList);
     }
 
+    @Override
+    public void addIntervenerToAccount(AddIntervenerToAccountDto addIntervenerToAccountDto) {
+        Entity user = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        verifyService.verifyTransactionCode(addIntervenerToAccountDto.getVerificationCode(), true);
+        EntityContract entityContract = user.getContracts().stream().filter(entityContractFor ->
+                entityContractFor.getContract().getAccount().getAccountNumber().equals(addIntervenerToAccountDto.getAccountNumber())
+                    && !entityContractFor.getContract().getDeactivated()
+                    && entityContractFor.getRole() == EntityContractRole.OWNER
+        ).findFirst().orElseThrow(()-> new CustomException("ACCOUNTS-010","Account not found, deactivated or not owned",400));
+        Optional<EntityContract> optionalEntityContract = entityContract.getContract().getEntityContract().stream().filter(entityContractFor-> entityContractFor.getEntity().getTaxId().equals(addIntervenerToAccountDto.getTaxId())).findAny();
+        if(optionalEntityContract.isEmpty()){
+            Entity userToAssign = entityRepository.findByTaxId(addIntervenerToAccountDto.getTaxId()).orElseThrow(()-> new CustomException("ACCOUNTS-012","User not found",404));
+            entityContractRepository.save(EntityContract.builder().role(addIntervenerToAccountDto.getRole()).entity(userToAssign).contract(entityContract.getContract()).build());
+            return;
+        }
+        optionalEntityContract.get().setRole(addIntervenerToAccountDto.getRole());
+        entityContractRepository.save(optionalEntityContract.get());
+    }
 
 }
