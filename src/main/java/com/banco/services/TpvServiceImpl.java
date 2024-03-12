@@ -27,19 +27,13 @@ public class TpvServiceImpl implements TpvService {
     private final CopyNonNullFields mapperService;
     private final EntityUtils entityUtils;
 
-    //#region Implementación de interfaz TpvService
-    // @Override
-    // public List<TpvDto> getAll() throws CustomException {
-    //     /*return entityUtils.checkIfEntityExists(entityUtils.extractUser())
-    //             .getContracts().stream().filter(contract->contract.getContract().getType() == ContractType.TPV && !contract.getContract().getDeactivated())
-    //             .toList().stream().map();*/
-    //     return tpvRepository.findAll().stream().map(tpv->{
-    //         TpvDto dto = new TpvDto();
-    //         mapperService.copyNonNullProperties(tpv, dto, false);
-    //         return dto;
-    //     }).toList();
-    // }
-
+    /**
+     * TODO SE TRAE Tó
+     *
+     * todo  DANI MARICA Y JESUS TB (TABACO)
+     * @return
+     * @throws CustomException
+     */
     @Override
     public List<TpvDto> getAll() throws CustomException {
         List<Long> contracts = entityUtils.checkIfEntityExists(entityUtils.extractUser())
@@ -57,8 +51,14 @@ public class TpvServiceImpl implements TpvService {
                 return dto;
             })
             .toList();
-    } 
+    }
 
+    /**
+     * TODO CREAR EL CONTRATO DE TIPO TPV PARA ESA CUENTA, TENIENDO 2 CONTRATOS POR CUENTA 1 DE CUENTA Y OTRO TPV MINIMO
+     * TODO SE DEBE TENER EN CUENTA QUE DEBE ESTAR LIGADO ESE TPV A TODOS LOS CONTRATOS DE LA CUENTA AL MOMENTO DE AGREGARLO*
+     * @param dto
+     * @throws CustomException
+     */
     @Override
     public void create(TpvDto dto) throws CustomException {
         Tpv tpv = new Tpv();
@@ -66,6 +66,12 @@ public class TpvServiceImpl implements TpvService {
         tpvRepository.save(tpv);
     }
 
+    /**
+     * TODO SE RETORNA EL PAGO EN CASO DE CANCELAR LA CONFIRMACIÓN DEL FRONT, EN CASO CONTRARIO SE COBRA PERO SIEMPRE
+     * TODO QUEDA CREADA LA TRANSACCIÓN DEL PAGO.
+     * @param idTransaction Identificador único de la transacción.
+     * @throws CustomException
+     */
     @Override
     public void returnPayment(Long idTransaction) throws CustomException {
         TpvTransactions tpvTransaction = tpvTransactionsRepository.findById(idTransaction)
