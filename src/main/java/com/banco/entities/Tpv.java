@@ -12,9 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * <h1>Entidad PTV</h1>
+ * <h1>Entidad TPV</h1>
  *
  * <p>Esta entidad representa un terminal de punto de venta (TPV) como sistema
  * de pagos en línea dependiente de los contratos.</p>
@@ -27,7 +28,8 @@ import java.util.Date;
  * <li><b>activationDate:</b> Fecha de última activación</li>
  * <li><b>activationDate:</b> Fecha de última desactivación</li>
  * <li><b>activated:</b> Flag que indica si está activada la PTV</li>
- * <li><b>contract:</b> Cuando lo sepamos te decimos máquina T_T</li>
+ * <li><b>contract:</b> Contrato asignado al TPV</li>
+ * <li><b>tpvTransactions:</b> Lista de transacciones asociadas a cada TPV</li>
  * </ul>
  */
 @Entity
@@ -62,11 +64,12 @@ public class Tpv {
     private Boolean activated;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @OneToOne(cascade = CascadeType.REFRESH)
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @OneToOne(cascade = CascadeType.REFRESH)
     private Contract contract;
 
-    @OneToOne
-    @JsonIgnore
-    private TpvTransactions tpvTransactions;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @OneToMany(mappedBy = "tpv", cascade = CascadeType.REMOVE)
+    private List<TpvTransactions> tpvTransactions;
 }

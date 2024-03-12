@@ -33,8 +33,8 @@ public interface TpvService {
      * Method return payment
      * Devuelve un pago efectuado
      *
-     * @param idTransaction
-     * @throws CustomException
+     * @param idTransaction Identificador único de la transacción.
+     * @throws CustomException Error al retornar el pago.
      */
     void returnPayment(Long idTransaction) throws CustomException;
 

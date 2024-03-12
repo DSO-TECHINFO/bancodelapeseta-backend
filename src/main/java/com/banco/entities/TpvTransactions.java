@@ -10,8 +10,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigInteger;
-
+/**
+ * <h1>Entidad Transacciones TPV</h1>
+ *
+ * <p>Esta entidad representa cada transacción realizada por el TPV</p>
+ *
+ * <h3>Propiedades</h3>
+ * <ul>
+ * <li><b>id:</b> Identificador único de la PTV</li>
+ * <li><b>tpv:</b> Terminal de punto de venta en el que realiza la transacción</li>
+ * <li><b>card:</b> Tarjeta de crédito que se va a cobrar</li>
+ * <li><b>transactionNumber:</b> Número serial de la transacción</li>
+ * <li><b>confirmation:</b> Confirmación de si el usuario aceptó el cobro.</li>
+ * </ul>
+ */
 @Entity
 @Table(name = "tpv_transactions")
 @Data
@@ -23,18 +35,20 @@ public class TpvTransactions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Tpv tpv;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Tpv tpv;
+    @OneToOne(cascade = CascadeType.REFRESH)
+    private Card card;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String transactionNumber;
 
-    @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private Card card1;
-
+    private Boolean confirmation;
 }
