@@ -19,8 +19,6 @@ public interface TpvTransactionsRepository extends JpaRepository<TpvTransactions
      * las más recientes en caso de que no se reciban los parámetros correctamente.</p>
      *
      * @param tpvId Identificador único del tpv al que pertenecen las transacciones.
-     * @param init Inicio del intervalo.
-     * @param end Fin del intervalo.
      * @return Lista disponible de transacciones de un tpv específico.
      */
     @Query(value = """
@@ -32,12 +30,9 @@ public interface TpvTransactionsRepository extends JpaRepository<TpvTransactions
                 ts.tpvId = :tpvId
             ORDER BY
                 ts.activation_date DESC
-            LIMIT :init,:end
-            """)
+    """, nativeQuery = true)
     List<TpvTransactions> findAllByTpv(
-            @Param("tpvId") Long tpvId,
-            @Param("init") int init,
-            @Param("end") int end
+            @Param("tpvId") Integer tpvId
     );
 
 }

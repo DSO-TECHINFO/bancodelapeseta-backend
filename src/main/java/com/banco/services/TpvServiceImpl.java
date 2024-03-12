@@ -3,13 +3,9 @@ package com.banco.services;
 import java.util.List;
 
 import com.banco.entities.ContractType;
-import com.banco.mappers.TpvMapper;
-import com.banco.repositories.EntityRepository;
 import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
 
-import org.hibernate.type.CustomType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.banco.dtos.TpvDto;
@@ -22,11 +18,6 @@ import com.banco.repositories.TpvTransactionsRepository;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-
-import lombok.AllArgsConstructor;
-
 @Service
 @AllArgsConstructor
 public class TpvServiceImpl implements TpvService {
@@ -37,17 +28,36 @@ public class TpvServiceImpl implements TpvService {
     private final EntityUtils entityUtils;
 
     //#region Implementación de interfaz TpvService
+    // @Override
+    // public List<TpvDto> getAll() throws CustomException {
+    //     /*return entityUtils.checkIfEntityExists(entityUtils.extractUser())
+    //             .getContracts().stream().filter(contract->contract.getContract().getType() == ContractType.TPV && !contract.getContract().getDeactivated())
+    //             .toList().stream().map();*/
+    //     return tpvRepository.findAll().stream().map(tpv->{
+    //         TpvDto dto = new TpvDto();
+    //         mapperService.copyNonNullProperties(tpv, dto, false);
+    //         return dto;
+    //     }).toList();
+    // }
+
     @Override
     public List<TpvDto> getAll() throws CustomException {
-        /*return entityUtils.checkIfEntityExists(entityUtils.extractUser())
-                .getContracts().stream().filter(contract->contract.getContract().getType() == ContractType.TPV && !contract.getContract().getDeactivated())
-                .toList().stream().map();*/
-        return tpvRepository.findAll().stream().map(tpv->{
-            TpvDto dto = new TpvDto();
-            mapperService.copyNonNullProperties(tpv, dto, false);
-            return dto;
-        }).toList();
-    }
+        List<Long> contracts = entityUtils.checkIfEntityExists(entityUtils.extractUser())
+            .getContracts()
+            .stream()
+            .filter(entityContract -> entityContract.getContract().getType().equals(ContractType.TPV) && !entityContract.getContract().getDeactivated())
+            .map(contract -> contract.getId())
+            .toList();
+
+        return tpvRepository.findByContractIds(contracts)
+            .stream()
+            .map(tpv -> {
+                TpvDto dto = new TpvDto();
+                mapperService.copyNonNullProperties(tpv, dto, false);
+                return dto;
+            })
+            .toList();
+    } 
 
     @Override
     public void create(TpvDto dto) throws CustomException {

@@ -2,6 +2,8 @@ package com.banco.dtos;
 
 import java.util.Date;
 
+import com.banco.entities.Contract;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,4 +19,5 @@ public class TpvDto {
     private Date activationDate;
     private Date deactivationDate;
     private Boolean activated;
+    private Contract contract;
 }
