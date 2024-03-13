@@ -16,8 +16,4 @@ import lombok.NoArgsConstructor;
 public class TpvDto {
     private String serialNumber;
     private String tpvCode;
-    private Date activationDate;
-    private Date deactivationDate;
-    private Boolean activated;
-    private Contract contract;
 }

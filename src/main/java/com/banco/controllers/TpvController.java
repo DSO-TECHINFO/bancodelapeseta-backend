@@ -24,9 +24,9 @@ public class TpvController {
         return ResponseEntity.ok(tpvService.getAll());
     }
     
-    @PostMapping("/create")
-    public ResponseEntity<?> createTpv(@RequestBody TpvDto tpvDto){
-        tpvService.create(tpvDto);
+    @PostMapping("/create/{accountId}/{productId}")
+    public ResponseEntity<?> createTpv(@PathVariable("accountId") Long accountId, @PathVariable("productId") Long productId, @RequestBody TpvDto tpvDto){
+        tpvService.create(tpvDto, accountId, productId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -25,9 +25,11 @@ public interface TpvService {
      * <p>Crea un nuevo con la información recibida.</p>
      * 
      * @param tpv Nuevo Tpv que se va a crear.
+     * @param accountId Identificador único de la cuenta.
+     * @param productId Identificador único del producto asociado al contrato.
      * @throws CustomException Error al crear un nuevo Tpv.
      */
-    void create(TpvDto tpv) throws CustomException;
+    void create(TpvDto tpv, Long accountId, Long productId) throws CustomException;
 
     /**
      * Method return payment

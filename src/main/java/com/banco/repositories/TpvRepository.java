@@ -13,37 +13,34 @@ import org.springframework.data.repository.query.Param;
  * <p>Representación de un terminal de punto de venta en el repositorio de datos.</p>
  */
 public interface TpvRepository extends JpaRepository<Tpv, Long> {
+
     /**
      * Obtiene el Tpv asociado a un contrato específico.
      * @param contractId Identificador único del contrato cuyo tpv se va a obtener.
      * @return Tpv asociado al contrato recibido
      */
-    @Query(value = """
+    @Query(nativeQuery = true, value = """
             SELECT
                 t.*
             FROM
                 tpv t
             WHERE
                 t.contract_id = :contractId
-            """,
-            nativeQuery = true)
-    Tpv findByContractId(
-            @Param("contractId") Integer contractId
-    );
+            """)
+    Tpv findByContractId(@Param("contractId") Integer contractId);
 
     /**
-     * Obtiene el Tpv asociado a un contrato específico.
+     * Obtiene los tpv asociado a un contrato específico.
      * @param contractIds Identificadores únicos de los contratos cuyo tpv se va a obtener.
-     * @return Tpv asociado a los contratos recibidos
+     * @return Tpv asociados a los contratos recibidos
      */
-    @Query(value = """
+    @Query(nativeQuery = true, value = """
             SELECT
                 t.*
             FROM
                 tpv t
             WHERE
                 t.contract_id IN (:contracts)
-            """,
-            nativeQuery = true)
+            """)
     List<Tpv> findByContractIds(@Param("contracts") List<Long> contractIds);
 }

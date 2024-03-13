@@ -40,8 +40,7 @@ public class TpvTransactions {
     private Tpv tpv;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @OneToOne(cascade = CascadeType.REFRESH)
+    @Column
     private String card;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

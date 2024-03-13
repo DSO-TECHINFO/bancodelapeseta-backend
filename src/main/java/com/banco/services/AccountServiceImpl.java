@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Service
 public class AccountServiceImpl implements AccountService{
-    private EntityRepository entityRepository;
     private EntityUtils entityUtils;
     private ProductUtils productUtils;
     private CurrencyUtils currencyUtils;
@@ -31,6 +30,7 @@ public class AccountServiceImpl implements AccountService{
     private AccountRepository accountRepository;
     private TransferRepository transferRepository;
     private ContractRepository contractRepository;
+
     @Override
     public List<EntityContract> getAccounts() throws CustomException {
 
@@ -38,6 +38,19 @@ public class AccountServiceImpl implements AccountService{
                 .getContracts().stream().filter(contract -> contract.getContract().getType() == ContractType.ACCOUNT && !contract.getContract().getDeactivated())
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    public Account getAccountById(Long accountId) throws CustomException {
+        List<EntityContract> contracts = entityUtils.checkIfEntityExists(entityUtils.extractUser()).getContracts().stream()
+                .filter(contract->contract.getContract().getType() == ContractType.ACCOUNT && !contract.getContract().getDeactivated())
+                .toList();
+
+        for (EntityContract c : contracts)
+            if(c.getContract().getAccount().getId().equals(accountId))
+                return c.getContract().getAccount();
+
+        return null;
     }
 
     @Override
