@@ -4,6 +4,8 @@ import com.banco.dtos.LoanDto;
 import com.banco.dtos.LoanRequestDto;
 import com.banco.entities.Loan;
 import com.banco.exceptions.CustomException;
+import com.banco.services.CreateLoanService;
+import com.banco.services.CreateLoanServiceImpl;
 import com.banco.services.LoanServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,8 @@ import java.util.List;
 public class LoanController {
     LoanServiceImpl loanService;
 
+    CreateLoanServiceImpl createLoanService;
+
     @GetMapping
     public ResponseEntity<List<LoanDto>> getLoans() throws CustomException {
         return ResponseEntity.ok(loanService.getLoans());
@@ -26,6 +30,7 @@ public class LoanController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createLoan(@RequestBody @Validated LoanRequestDto loanRequestDto){
-        return ResponseEntity.ok("200");
+        createLoanService.loanCreation(loanRequestDto);
+        return ResponseEntity.ok(200);
     }
 }
