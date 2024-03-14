@@ -47,6 +47,19 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
+    public Account getAccountById(Long accountId) throws CustomException {
+        List<EntityContract> contracts = entityUtils.checkIfEntityExists(entityUtils.extractUser()).getContracts().stream()
+                .filter(contract->contract.getContract().getType() == ContractType.ACCOUNT && !contract.getContract().getDeactivated())
+                .toList();
+
+        for (EntityContract c : contracts)
+            if(c.getContract().getAccount().getId().equals(accountId))
+                return c.getContract().getAccount();
+
+        return null;
+    }
+
+    @Override
     public void createAccount(CreateNewAccountDto createNewAccountDto) throws CustomException {
         Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
         Product product = productUtils.checkProduct(productUtils.extractProduct(createNewAccountDto.getProductId()));

@@ -9,6 +9,7 @@ import com.banco.repositories.AmortizationPlanRepository;
 import com.banco.repositories.ContractRepository;
 import com.banco.repositories.LoanRepository;
 import com.banco.utils.EntityUtils;
+import com.banco.utils.ProductUtils;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,12 @@ public class LoanServiceImpl implements LoanService{
 
     LoanRepository loanRespoitory;
     EntityUtils entityUtils;
-
+    ProductUtils productUtils;
     LoanMapper loanMapper;
+    AccountServiceImpl accountService;
     AmortizationPlanRepository amortizationPlanRepository;
     CalculateAmortizationServiceImpl calculateAmortizationService;
     LoanRepository loanRepository;
-
     ContractRepository contractRepository;
 
     @Override
@@ -54,37 +55,41 @@ public class LoanServiceImpl implements LoanService{
      */
 
     @Override
-    public void loanCreation(LoanRequestDto loanRequestDto) {
+    public void loanCreation(LoanRequestDto loanRequestDto, Long accountId, Long productId) {
         Loan loan = loanMapper.LoanRequestDtoToLoan(loanRequestDto);
         this.saveAmortizationPlan(loan);
-        this.saveLoan(loan);
+        this.saveLoan(loan, accountId, productId);
     }
 
-    private void saveLoan(Loan loan){
-        loan.setStartDate(Date.valueOf(LocalDate.now()));
+    private void saveLoan(Loan loan, Long accountId, Long productId){
 
         Date initialFinishDate = Date.valueOf(LocalDate.now().plusMonths(loan.getLoanNumberPayments()));
-        loan.setInitialFinishDate(initialFinishDate);
+        BigDecimal amountWithInterest = loan.getTotalAmount().multiply(loan.getInterestRate());
+        Account account = accountService.getAccountById(accountId);
 
+        loan.setStartDate(Date.valueOf(LocalDate.now()));
+        loan.setInitialFinishDate(initialFinishDate);
         loan.setCurrentFinishDate(initialFinishDate);
         loan.setPaidAmount(new BigDecimal(BigInteger.ZERO));
-
-        BigDecimal amountWithInterest = loan.getTotalAmount().multiply(loan.getInterestRate());
         loan.setUnpaidAmount(amountWithInterest);
-
         loan.setPendingAmount(amountWithInterest);
         loan.setPaidSubscriptions(0);
         loan.setUnpaidSubscription(loan.getLoanNumberPayments());
+        loan.setAccount(account);
 
+        Product product = productUtils.checkProduct(productUtils.extractProduct(productId));
 
         Contract contract = Contract.builder()
                 .creationDate(new java.util.Date())
-                .account(new Account())
+                .product(product)
+                .account(account)
                 .deactivated(false)
-                .type(ContractType.ACCOUNT)
+                .type(ContractType.LOAN)
+                .loan(loan)
                 .build();
-        contractRepository.save(contract);
+
         loanRepository.save(loan);
+        contractRepository.save(contract);
     }
     private void saveAmortizationPlan(Loan loan){
         List <AmortizationPlan> amortizationPlans = calculateAmortizationService.calculateAmortization(loan);

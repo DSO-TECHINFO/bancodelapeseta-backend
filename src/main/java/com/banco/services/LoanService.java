@@ -10,5 +10,5 @@ import java.util.List;
 public interface LoanService {
     List<LoanDto> getLoans() throws CustomException;
 
-    public void loanCreation(LoanRequestDto loanRequestDto);
+    public void loanCreation(LoanRequestDto loanRequestDto, Long accountId, Long productId);
 }

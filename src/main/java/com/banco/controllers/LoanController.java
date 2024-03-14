@@ -6,7 +6,6 @@ import com.banco.exceptions.CustomException;
 import com.banco.services.LoanServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +22,9 @@ public class LoanController {
         return ResponseEntity.ok(loanService.getLoans());
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createLoan(@RequestBody @Validated LoanRequestDto loanRequestDto){
-        loanService.loanCreation(loanRequestDto);
+    @PostMapping("/create/{accountId}/{productId}")
+    public ResponseEntity<?> createLoan(@PathVariable("accountId") Long accountId, @PathVariable("productId") Long productId, @RequestBody LoanRequestDto loanRequestDto){
+        loanService.loanCreation(loanRequestDto, accountId, productId);
         return ResponseEntity.ok(200);
     }
 }

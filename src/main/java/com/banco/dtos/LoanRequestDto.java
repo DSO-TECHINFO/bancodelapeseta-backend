@@ -19,8 +19,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class LoanRequestDto {
 
-    @NotNull
-    private Long accountId;
 
     @NotNull
     private BigDecimal amount;
@@ -28,13 +26,9 @@ public class LoanRequestDto {
     @NotNull
     private BigDecimal interestRate;
 
-    // testear si tira error si no respeto este formato
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
-
-    // crear validacion para que la validacion tenga minimo
-    // agregar validacion de formato de fecha fecha
 
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -51,5 +45,8 @@ public class LoanRequestDto {
 
     @NotNull
     private Integer loanNumberPayments;
+
+    @NotNull
+    private Long productId;
 
   }
