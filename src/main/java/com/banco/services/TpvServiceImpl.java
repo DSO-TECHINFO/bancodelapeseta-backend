@@ -33,6 +33,7 @@ public class TpvServiceImpl implements TpvService {
     private final AccountService accountService;
     private final TpvTransactionsRepository tpvTransactionsRepository;
     private final ContractRepository contractRepository;
+    private final AccountRepository accountRepository;
     private final CopyNonNullFields mapperService;
     private final EntityUtils entityUtils;
     private ProductUtils productUtils;
@@ -92,9 +93,31 @@ public class TpvServiceImpl implements TpvService {
     @Override
     public void returnPayment(Long idTransaction) throws CustomException {
         TpvTransactions tpvTransaction = tpvTransactionsRepository.findById(idTransaction)
-            .orElseThrow( () ->
-                new CustomException("NOT_FOUND", "No se ha encontrado esta transaccion", 404)
-            );
+            .orElseThrow( () -> new CustomException("NOT_FOUND", "No se ha encontrado esta transaccion", 404));
+
+        if (tpvTransaction.getDevuelto()) {
+            throw new CustomException("UNHANDLED-001", "Ya se ha devuelto", 406);
+        }
+
+        if (tpvTransaction.getConfirmation()) {
+            Account dealerAccount = tpvTransaction.getTpv().getContract().getAccount();
+
+            if (dealerAccount.getBalance().compareTo(tpvTransaction.getAmount()) <= 0) {
+                throw new CustomException("UNHANDLED-002", "No hay fondos suficientes para hacer la devolucion", 406);
+            }
+
+            dealerAccount.setBalance(dealerAccount.getBalance().subtract(tpvTransaction.getAmount()));
+            dealerAccount.setBalance(dealerAccount.getReal_balance().subtract(tpvTransaction.getAmount()));
+            accountRepository.save(dealerAccount);
+        }
+
+        Account cuentaTarjetaPago = contractRepository.findByCard(tpvTransaction.getCard()).getAccount();
+        cuentaTarjetaPago.setBalance(cuentaTarjetaPago.getBalance().add(tpvTransaction.getAmount()));
+        cuentaTarjetaPago.setReal_balance(cuentaTarjetaPago.getReal_balance().add(tpvTransaction.getAmount()));
+        accountRepository.save(cuentaTarjetaPago);
+
+        tpvTransaction.setDevuelto(true);
+        tpvTransactionsRepository.save(tpvTransaction);
     }
 
     @Override

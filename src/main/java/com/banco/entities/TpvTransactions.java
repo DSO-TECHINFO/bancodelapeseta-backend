@@ -1,5 +1,7 @@
 package com.banco.entities;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
  * <li><b>card:</b> Tarjeta de crédito que se va a cobrar</li>
  * <li><b>transactionNumber:</b> Número serial de la transacción</li>
  * <li><b>confirmation:</b> Confirmación de si el usuario aceptó el cobro.</li>
+ * <li><b>devuelto: </b> Confirmación de si se ha devuelto el cobro</li>
  * </ul>
  */
 @Entity
@@ -49,5 +52,13 @@ public class TpvTransactions {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
+    private BigDecimal amount;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
     private Boolean confirmation;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
+    private Boolean devuelto;
 }
