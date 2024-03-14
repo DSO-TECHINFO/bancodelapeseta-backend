@@ -2,6 +2,7 @@ package com.banco.services;
 
 import com.banco.dtos.TpvDto;
 import com.banco.exceptions.CustomException;
+import com.banco.dtos.TpvDtoCreate;
 
 import java.util.List;
 
@@ -24,12 +25,11 @@ public interface TpvService {
      * <h2>Method create</h2>
      * <p>Crea un nuevo con la información recibida.</p>
      * 
-     * @param tpv Nuevo Tpv que se va a crear.
+     * @param dtoCreate Nuevo Tpv que se va a crear.
      * @param accountId Identificador único de la cuenta.
-     * @param productId Identificador único del producto asociado al contrato.
      * @throws CustomException Error al crear un nuevo Tpv.
      */
-    void create(TpvDto tpv, Long accountId, Long productId) throws CustomException;
+    void create(TpvDtoCreate dtoCreate, Long accountId) throws CustomException;
 
     /**
      * Method return payment

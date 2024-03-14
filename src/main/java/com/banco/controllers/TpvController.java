@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.banco.dtos.TpvDtoCreate;
 
 /**
  * <h2>Controller TpvController</h2>
@@ -24,9 +25,9 @@ public class TpvController {
         return ResponseEntity.ok(tpvService.getAll());
     }
     
-    @PostMapping("/create/{accountId}/{productId}")
-    public ResponseEntity<?> createTpv(@PathVariable("accountId") Long accountId, @PathVariable("productId") Long productId, @RequestBody TpvDto tpvDto){
-        tpvService.create(tpvDto, accountId, productId);
+    @PostMapping("/create/{accountId}")
+    public ResponseEntity<?> createTpv(@PathVariable("accountId") Long accountId, @RequestBody TpvDtoCreate tpvDtoCreate){
+        tpvService.create(tpvDtoCreate, accountId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

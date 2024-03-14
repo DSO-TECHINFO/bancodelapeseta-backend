@@ -4,11 +4,15 @@ import java.util.Date;
 import java.util.List;
 
 import com.banco.entities.*;
+import com.banco.repositories.AccountRepository;
 import com.banco.repositories.ContractRepository;
+import com.banco.repositories.EntityContractRepository;
 import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
 
 import com.banco.utils.ProductUtils;
+
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import com.banco.dtos.TpvDto;
@@ -18,12 +22,14 @@ import com.banco.repositories.TpvTransactionsRepository;
 
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import com.banco.dtos.TpvDtoCreate;
 
 @Service
 @AllArgsConstructor
 public class TpvServiceImpl implements TpvService {
 
     private final TpvRepository tpvRepository;
+    private final EntityContractRepository entityContractRepository;
     private final AccountService accountService;
     private final TpvTransactionsRepository tpvTransactionsRepository;
     private final ContractRepository contractRepository;
@@ -34,8 +40,7 @@ public class TpvServiceImpl implements TpvService {
     @Override
     public List<TpvDto> getAll() throws CustomException {
         return tpvRepository.findByContractIds(entityUtils.checkIfEntityExists(entityUtils.extractUser())
-            .getContracts()
-            .stream()
+            .getContracts().stream()
             .filter(entityContract -> !entityContract.getContract().getDeactivated())
             .map(contract-> contract.getContract().getId()).toList()).stream().map(tpv -> {
                 TpvDto dto = new TpvDto();
@@ -45,17 +50,34 @@ public class TpvServiceImpl implements TpvService {
     }
 
     @Override
-    public void create(TpvDto dto, Long accountId, Long productId) throws CustomException {
-        List<EntityContract> contractsWithAccount = entityUtils.checkIfEntityExists(entityUtils.extractUser())
-            .getContracts().stream().filter(contract -> contract.getContract().getAccount().getId().equals(accountId)).toList();
+    public void create(TpvDtoCreate dtoCreate, Long accountId) throws CustomException {
+        //Verificar que existan contratos para la cuenta recibida.
+        entityUtils.checkIfEntityExists(entityUtils.extractUser())
+            .getContracts().stream()
+            .filter(account-> account.getContract().getAccount().getId().equals(accountId))
+            .findFirst().orElseThrow(()->{
+                throw new CustomException("NOT_FOUND", "No se ha Encontrado la cuenta", 404);
+            });
 
-        if(!contractsWithAccount.isEmpty()){
-            Product product = productUtils.checkProduct(productUtils.extractProduct(productId));
-            Tpv tpv = new Tpv();
-            mapperService.copyNonNullProperties(dto, tpv, true);
-            Contract contract = Contract.builder().creationDate(new Date()).account(accountService.getAccountById(accountId)).product(product).deactivated(false).type(ContractType.TPV).tpv(tpv).build();
+        //Entidades necesarias.
+        Tpv tpv = new Tpv();
+        Product product = productUtils.checkProduct(productUtils.extractProduct(dtoCreate.getProductId()));
+
+        //Generar el tpv_code automático para el usuario teniendo en cuenta los que ya tiene.
+        tpv.setTpvCode(String.format("tpv_", entityUtils.checkIfEntityExists(entityUtils.extractUser()).getContracts().stream()
+            .filter(account->account.getContract().getType().equals(ContractType.TPV)).count()+1));
+            mapperService.copyNonNullProperties(dtoCreate, tpv, false);
+        Contract contract = Contract.builder().creationDate(new Date()).account(accountService.getAccountById(accountId)).product(product).deactivated(false).type(ContractType.TPV).tpv(tpv).build();
+
+        //Si no existe un contrato con ese tpv para ese usuario, se genera todo.
+        boolean contractWithTpv = entityUtils.checkIfEntityExists(entityUtils.extractUser()).getContracts().stream()
+            .filter(account->account.getContract().getTpv() != null && account.getContract().getTpv().getTpvCode().equals(tpv.getTpvCode())).count() > 0;
+
+        if(!contractWithTpv){
+            EntityContract entityContract = EntityContract.builder().contract(contract).entity(entityUtils.checkIfEntityExists(entityUtils.extractUser())).role(dtoCreate.getRole()).build();
             tpvRepository.save(tpv);
-            contractRepository.save(contract);
+            //contractRepository.save(contract);
+            entityContractRepository.save(entityContract);
         }
     }
 

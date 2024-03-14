@@ -1,5 +1,7 @@
 package com.banco.dtos;
 
+import com.banco.entities.EntityContractRole;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TpvDto {
+public class TpvDtoCreate {
+    private EntityContractRole role;
+    private Long productId;
     private String serialNumber;
-    private String tpvCode;
 }
