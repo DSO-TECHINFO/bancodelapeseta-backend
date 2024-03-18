@@ -1,6 +1,7 @@
 package com.banco.services;
 
 
+import com.banco.dtos.CancelTransferDto;
 import com.banco.dtos.CreateTransferDto;
 import com.banco.entities.Transfer;
 import jakarta.transaction.Transactional;
@@ -13,4 +14,6 @@ public interface TransferService {
 
     @Transactional
     void createTransfer(CreateTransferDto createTransferDto);
+
+    void cancelTransfer(CancelTransferDto cancelTransferDto);
 }
