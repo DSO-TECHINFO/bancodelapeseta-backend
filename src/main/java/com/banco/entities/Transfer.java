@@ -1,5 +1,6 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -27,13 +28,13 @@ public class Transfer {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String beneficiaryName;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private String destinationAccount;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private String payerName;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private String payerAccount;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -45,13 +46,16 @@ public class Transfer {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private TransferStatus status;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private BigDecimal fee;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     @Column
     private String externalReference;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private BigDecimal amount;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
+    private String currency;
 }

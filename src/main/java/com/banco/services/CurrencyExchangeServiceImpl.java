@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 public class CurrencyExchangeServiceImpl implements CurrencyExchangeService{
     @Value("${currency.exchange.url}")
     private String EXCHANGE_URL;
-    @Value("${currency.exchange.api-key}")
+    @Value("${currency.exchange.apikey}")
     private String API_KEY;
     @Override
     public CurrencyExchangeDto getCurrencyExchangeRate(String currencyFrom) {
