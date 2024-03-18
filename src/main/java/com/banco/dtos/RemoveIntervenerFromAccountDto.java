@@ -1,5 +1,6 @@
 package com.banco.dtos;
 
+import com.banco.entities.EntityContractRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CardCredentialsDto {
-    private String cvv;
-    private String pin;
+public class RemoveIntervenerFromAccountDto {
+
+    private String accountNumber;
+    private String taxId;
+    private String verificationCode;
 }

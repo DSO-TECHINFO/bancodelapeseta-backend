@@ -1,5 +1,6 @@
 package com.banco.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CardCredentialsDto {
-    private String cvv;
-    private String pin;
+public class CurrencyDto {
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String currency;
+
 }

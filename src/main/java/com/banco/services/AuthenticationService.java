@@ -1,6 +1,7 @@
 package com.banco.services;
 
 import com.banco.dtos.*;
+import com.banco.entities.Entity;
 import com.banco.exceptions.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -31,4 +32,6 @@ public interface AuthenticationService {
     void recoveryPasswordChange(RecoveryPasswordChangeDto recoveryPasswordChangeDto) throws CustomException;
 
     RecoveryPasswordCodeReturnDto recoveryPasswordCheckCode(RecoveryPasswordCodeInputDto recoveryPasswordCodeInputDto) throws CustomException;
+
+    CurrentUserDto getCurrentUser();
 }
