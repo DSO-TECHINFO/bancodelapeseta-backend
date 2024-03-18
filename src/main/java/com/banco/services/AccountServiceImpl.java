@@ -69,7 +69,7 @@ public class AccountServiceImpl implements AccountService{
             throw new CustomException("ACCOUNTS-002", "This product is not eligible to create an account", 400);
         if(product.getEntityType() != entity.getType())
             throw new CustomException("ACCOUNTS-003", "You cannot chose that product", 400);
-        Account account = Account.builder().currency(currency).accountNumber(accountUtils.createAccountNumber()).balance(new BigDecimal(0)).real_balance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
+        Account account = Account.builder().currency(currency).accountNumber(accountUtils.createAccountNumber()).balance(new BigDecimal(0)).realBalance(new BigDecimal(0)).creationDate(new Date()).locked(false).build();
         Contract contract = Contract.builder().creationDate(new Date()).account(account).product(product).deactivated(false).type(ContractType.ACCOUNT).build();
         account.setContract(contract);
         EntityContract entityContract = EntityContract.builder().entity(entity).contract(contract).role(EntityContractRole.OWNER).build();
@@ -95,7 +95,7 @@ public class AccountServiceImpl implements AccountService{
 
         if(contractList.stream().anyMatch(contract -> contract.getType() == ContractType.LOAN))
             throw new CustomException("ACCOUNTS-004", "You cannot deactivate that account because there is a loan associated to it", 400);
-        if(account.isPresent() && account.get().getBalance().compareTo(new BigDecimal(0)) != 0 && account.get().getReal_balance().compareTo(new BigDecimal(0)) != 0)
+        if(account.isPresent() && account.get().getBalance().compareTo(new BigDecimal(0)) != 0 && account.get().getRealBalance().compareTo(new BigDecimal(0)) != 0)
             throw new CustomException("ACCOUNTS-005", "You cannot deactivate that account, you have balance on it", 400);
         if(transfers.stream().anyMatch(transfer -> transfer.getStatus() != TransferStatus.COMPLETED && transfer.getStatus() != TransferStatus.REJECTED))
             throw new CustomException("ACCOUNTS-006", "You cannot deactivate that account, at least one transfer is not completed", 400);
