@@ -12,7 +12,6 @@ import com.banco.utils.EntityUtils;
 
 import com.banco.utils.ProductUtils;
 
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import com.banco.dtos.TpvDto;
@@ -93,7 +92,7 @@ public class TpvServiceImpl implements TpvService {
     @Override
     public void returnPayment(Long idTransaction) throws CustomException {
         TpvTransactions tpvTransaction = tpvTransactionsRepository.findById(idTransaction)
-            .orElseThrow( () -> new CustomException("NOT_FOUND", "No se ha encontrado esta transaccion", 404));
+            .orElseThrow(() -> new CustomException("NOT_FOUND", "No se ha encontrado esta transaccion", 404));
 
         if (tpvTransaction.getDevuelto()) {
             throw new CustomException("UNHANDLED-001", "Ya se ha devuelto", 406);
@@ -107,13 +106,13 @@ public class TpvServiceImpl implements TpvService {
             }
 
             dealerAccount.setBalance(dealerAccount.getBalance().subtract(tpvTransaction.getAmount()));
-            dealerAccount.setBalance(dealerAccount.getReal_balance().subtract(tpvTransaction.getAmount()));
+            dealerAccount.setBalance(dealerAccount.getRealBalance().subtract(tpvTransaction.getAmount()));
             accountRepository.save(dealerAccount);
         }
 
         Account cuentaTarjetaPago = contractRepository.findByCard(tpvTransaction.getCard()).getAccount();
         cuentaTarjetaPago.setBalance(cuentaTarjetaPago.getBalance().add(tpvTransaction.getAmount()));
-        cuentaTarjetaPago.setReal_balance(cuentaTarjetaPago.getReal_balance().add(tpvTransaction.getAmount()));
+        cuentaTarjetaPago.setRealBalance(cuentaTarjetaPago.getRealBalance().add(tpvTransaction.getAmount()));
         accountRepository.save(cuentaTarjetaPago);
 
         tpvTransaction.setDevuelto(true);

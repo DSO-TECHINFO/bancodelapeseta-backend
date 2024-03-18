@@ -33,6 +33,7 @@ public class AccountServiceImpl implements AccountService{
     private AccountRepository accountRepository;
     private TransferRepository transferRepository;
     private ContractRepository contractRepository;
+    private EntityRepository entityRepository;
     private AccountUtils accountUtils;
 
     @Override

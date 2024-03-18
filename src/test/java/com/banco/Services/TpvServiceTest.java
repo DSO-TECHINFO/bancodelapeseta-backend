@@ -58,11 +58,11 @@ public class TpvServiceTest {
 
         Account dealerAccount = new Account();
         dealerAccount.setBalance(new BigDecimal("100.00"));
-        dealerAccount.setReal_balance(new BigDecimal("100.00"));
+        dealerAccount.setRealBalance(new BigDecimal("100.00"));
 
         Account cuentaTarjetaPago = new Account();
         cuentaTarjetaPago.setBalance(new BigDecimal("0.00"));
-        cuentaTarjetaPago.setReal_balance(new BigDecimal("0.00"));
+        cuentaTarjetaPago.setRealBalance(new BigDecimal("0.00"));
 
         Contract contract = new Contract();
         contract.setAccount(dealerAccount);
@@ -110,7 +110,7 @@ public class TpvServiceTest {
 
         Account dealerAccount = new Account();
         dealerAccount.setBalance(new BigDecimal("100.00"));
-        dealerAccount.setReal_balance(new BigDecimal("100.00"));
+        dealerAccount.setRealBalance(new BigDecimal("100.00"));
 
         Contract contract = new Contract();
         contract.setAccount(dealerAccount);
