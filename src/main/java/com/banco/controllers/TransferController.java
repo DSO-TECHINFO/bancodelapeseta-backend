@@ -1,5 +1,6 @@
 package com.banco.controllers;
 
+import com.banco.dtos.CancelTransferDto;
 import com.banco.dtos.CreateTransferDto;
 import com.banco.services.TransferService;
 import lombok.AllArgsConstructor;
@@ -21,5 +22,9 @@ public class TransferController {
         transferService.createTransfer(createTransferDto);
         return ResponseEntity.ok().build();
     }
-
+    @DeleteMapping("/cancel")
+    public ResponseEntity<?> cancelTransfer(@RequestBody CancelTransferDto cancelTransferDto){
+        transferService.cancelTransfer(cancelTransferDto);
+        return ResponseEntity.ok().build();
+    }
 }
