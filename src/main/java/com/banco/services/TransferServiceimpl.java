@@ -1,5 +1,6 @@
 package com.banco.services;
 
+import com.banco.dtos.CancelTransferDto;
 import com.banco.dtos.CreateTransferDto;
 import com.banco.entities.*;
 import com.banco.exceptions.CustomException;
@@ -11,10 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -71,6 +69,29 @@ public class TransferServiceimpl implements TransferService{
                 .amount(createTransferDto.getAmount())
                 .currency(entityContract.getContract().getAccount().getCurrency().getCurrency())
                 .build();
+
+        transferRepository.save(transfer);
+    }
+
+    @Override
+    public void cancelTransfer(CancelTransferDto cancelTransferDto) {
+        Entity user = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        Transfer transfer = transferRepository.findById(cancelTransferDto.getTransferId()).orElseThrow(()-> new CustomException("TRANSFERS-003", "Transfer not found", 400));
+        if(transfer.getStatus() != TransferStatus.PENDING)
+            throw new CustomException("TRANSFERS-005", "You cannot cancel this transaction",400);
+        verifyService.verifyTransactionCode(cancelTransferDto.getVerificationCode(), true);
+        EntityContract entityContract = user.getContracts().stream().filter(entityContractTmp -> entityContractTmp.getContract().getType() == ContractType.ACCOUNT
+                && entityContractTmp.getContract().getAccount().getAccountNumber().equals(transfer.getPayerAccount())
+                && (entityContractTmp.getRole() == EntityContractRole.OWNER
+                        || entityContractTmp.getRole() == EntityContractRole.CO_OWNER
+                        || entityContractTmp.getRole() == EntityContractRole.AUTHORIZED)
+                )
+                .findAny()
+                .orElseThrow(()-> new CustomException("TRANSFERS-004", "You cannot cancel this transaction", 400));
+        entityContract.getContract().getAccount().setBalance(entityContract.getContract().getAccount().getBalance().add(transfer.getAmount()));
+        accountRepository.save(entityContract.getContract().getAccount());
+
+        transfer.setStatus(TransferStatus.CANCELLED);
 
         transferRepository.save(transfer);
     }
