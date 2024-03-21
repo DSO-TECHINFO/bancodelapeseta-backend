@@ -1,11 +1,10 @@
 package com.banco.services;
 
-import com.banco.dtos.LoanDto;
-import com.banco.entities.Loan;
+import com.banco.entities.EntityContract;
 import com.banco.exceptions.CustomException;
 
 import java.util.List;
 
 public interface LoanService {
-    List<LoanDto> getLoans() throws CustomException;
+    List<EntityContract> getLoans() throws CustomException;
 }

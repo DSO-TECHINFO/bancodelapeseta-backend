@@ -45,7 +45,6 @@ public class LoanControllerTests {
     @WithMockUser
     public void getLoansOkTest() throws Exception {
         Loan loan = Loan.builder()
-                .account(new Account())
                 .amount(new BigDecimal("10000"))
                 .totalAmount(new BigDecimal("10500"))
                 .interestRate(new BigDecimal("0.05"))
