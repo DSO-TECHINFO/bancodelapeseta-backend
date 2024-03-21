@@ -1,5 +1,7 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -38,7 +40,8 @@ public class AmortizationPlan {
     @Column
     private BigDecimal pendingCapital;
 
-    @OneToOne
+    @JsonIgnore
+    @ManyToOne
     private Loan loan;
 
 }

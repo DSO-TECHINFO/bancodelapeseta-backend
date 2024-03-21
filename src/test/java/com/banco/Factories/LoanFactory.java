@@ -10,7 +10,6 @@ public class LoanFactory{
 
     public Loan sampleLoan (){
         return Loan.builder()
-                .account(new Account())
                 .amount(new BigDecimal("10000"))
                 .totalAmount(new BigDecimal("10500"))
                 .interestRate(new BigDecimal("40"))
