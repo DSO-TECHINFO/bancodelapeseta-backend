@@ -1,5 +1,6 @@
 package com.banco.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -36,6 +37,9 @@ public class Product {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private EntityType entityType;
+    @JsonIgnore
+    @Column
+    private CardNetwork network;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private ProductRecurrenceType recurrence;

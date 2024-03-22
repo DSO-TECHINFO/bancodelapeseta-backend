@@ -30,6 +30,10 @@ public class Card {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
+    private String personName;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Column
     private String expiration;
     
     @JsonIgnore
