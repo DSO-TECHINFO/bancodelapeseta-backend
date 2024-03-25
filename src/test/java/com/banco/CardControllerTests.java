@@ -82,10 +82,10 @@ class CardControllerTests {
         mockCards.add(Card.builder().number("1234 5678 9012").build());
         mockCards.add(Card.builder().number("3456 7890 1234").build());
         mockCards.forEach(card -> {
-                Contract mockContract = Contract.builder().card(card).type(ContractType.CARD).build();
-                EntityContract mockEntityContract = EntityContract.builder().contract(mockContract).build();
-                mockContracts.add(mockContract);
-                mockEntityContracts.add(mockEntityContract);
+            Contract mockContract = Contract.builder().card(card).type(ContractType.CARD).build();
+            EntityContract mockEntityContract = EntityContract.builder().contract(mockContract).build();
+            mockContracts.add(mockContract);
+            mockEntityContracts.add(mockEntityContract);
         });
 
         when(entityRepository.findByTaxId(any()))

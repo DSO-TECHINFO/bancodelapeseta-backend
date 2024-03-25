@@ -12,7 +12,6 @@ import com.banco.utils.CopyNonNullFields;
 import com.banco.utils.EntityUtils;
 import com.banco.dtos.CardCreateDto;
 import com.banco.dtos.CardCredentialsDto;
-import com.banco.dtos.CardDto;
 import com.banco.dtos.VerificationCodeDto;
 import com.banco.entities.Account;
 import com.banco.entities.Card;
@@ -22,7 +21,6 @@ import com.banco.entities.Entity;
 import com.banco.entities.EntityContract;
 import com.banco.entities.EntityContractRole;
 import com.banco.exceptions.CustomException;
-import com.banco.repositories.CardRepository;
 import com.banco.repositories.EntityContractRepository;
 import com.banco.security.AesService;
 

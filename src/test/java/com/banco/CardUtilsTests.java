@@ -7,6 +7,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.banco.entities.CardNetwork;
+import com.banco.entities.CardType;
 import com.banco.exceptions.CustomException;
 import com.banco.utils.CardUtils;
 
@@ -25,5 +27,20 @@ class CardUtilsTests {
     @Test
     void testLuhnAlgorithmFail() {
         Assertions.assertThrows(CustomException.class, () -> cardUtils.isCardNumberValid("123456789012348"));
+    }
+
+    @Test
+    void testGenerateCardNumber() {
+        CardNetwork cardNetwork = CardNetwork.VISA;
+        CardType cardType = CardType.DEBIT;
+
+        String account = "ES197912001098";
+        String name = "Jesus Martinez Garcia";
+        int nthAccountCard = 1;
+        String expectedCardNumber = "4500 8148 8431 367";
+
+        String card = cardUtils.createCardNumber(cardNetwork, cardType, account, name, nthAccountCard);
+        Assertions.assertEquals(expectedCardNumber, card);
+        Assertions.assertDoesNotThrow(() -> cardUtils.isCardNumberValid(expectedCardNumber));
     }
 }
