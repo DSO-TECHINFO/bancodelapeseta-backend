@@ -1,5 +1,6 @@
 package com.banco.Factories;
 
+import com.banco.dtos.LoanRequestDto;
 import com.banco.entities.*;
 
 
@@ -10,7 +11,6 @@ public class LoanFactory{
 
     public Loan sampleLoan (){
         return Loan.builder()
-                .account(new Account())
                 .amount(new BigDecimal("10000"))
                 .totalAmount(new BigDecimal("10500"))
                 .interestRate(new BigDecimal("40"))
@@ -40,6 +40,20 @@ public class LoanFactory{
                 .loanNumberPayments(loanNumberPayments)
                 .amount(amount)
                 .interestRate(interestRate)
+                .build();
+    }
+
+    public LoanRequestDto sampleDto(){
+        return LoanRequestDto.builder()
+                .amount(new BigDecimal("1000.00"))
+                .interestRate(new BigDecimal("0.05"))
+                .startDate(new Date())
+                .initialFinishDate(new Date())
+                .interestType(LoanInterestType.FIXED)
+                .subscriptionPeriodicity(LoanSubscriptionPeriodicity.MONTHLY)
+                .loanType(LoanType.PERSONAL)
+                .loanNumberPayments(12)
+                .productId(123L)
                 .build();
     }
 

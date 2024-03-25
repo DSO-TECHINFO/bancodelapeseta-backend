@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Service
 public class LoanServiceImpl implements LoanService{
-
-    LoanRepository loanRespoitory;
     EntityUtils entityUtils;
     ProductUtils productUtils;
     LoanMapper loanMapper;
@@ -42,17 +40,12 @@ public class LoanServiceImpl implements LoanService{
         List<EntityContract> entityContracts = this.entityLoanContracts();
         List<LoanDto> loans = new ArrayList<>();
         for (EntityContract contract: entityContracts) {
-            loanMapper.loanToLoanDto(loanRespoitory.findByContractId(contract.getId()));
-            loans.add(loanMapper.loanToLoanDto(loanRespoitory.findByContractId(contract.getId())));
+            loanMapper.loanToLoanDto(loanRepository.findByContractId(contract.getId()));
+            loans.add(loanMapper.loanToLoanDto(loanRepository.findByContractId(contract.getId())));
         }
         return loans;
     }
 
-    /**
-     * TODO : Agregar Account y Contract al loan antes del save.
-     *        Probar request
-     * @param loanRequestDto
-     */
 
     @Override
     public void loanCreation(LoanRequestDto loanRequestDto, Long accountId, Long productId) {

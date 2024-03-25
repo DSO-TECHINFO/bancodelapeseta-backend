@@ -36,7 +36,7 @@ public class Contract {
     @JsonIgnore
     @OneToMany(mappedBy = "contract",cascade = CascadeType.REMOVE)
     private List<EntityContract> entityContract;
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH} ,orphanRemoval = true)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE} ,orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Account account;

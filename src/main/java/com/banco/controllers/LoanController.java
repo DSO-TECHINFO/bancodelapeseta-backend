@@ -16,9 +16,8 @@ import java.util.List;
 public class LoanController {
     LoanServiceImpl loanService;
 
-
     @GetMapping
-    public ResponseEntity<List<LoanDto>> getLoans() throws CustomException {
+    public ResponseEntity<List<LoanDto>> getLoans(){
         return ResponseEntity.ok(loanService.getLoans());
     }
 

@@ -45,7 +45,6 @@ public class LoanControllerTests {
     @WithMockUser
     public void getLoansOkTest() throws Exception {
         Loan loan = Loan.builder()
-                .account(new Account())
                 .amount(new BigDecimal("10000"))
                 .totalAmount(new BigDecimal("10500"))
                 .interestRate(new BigDecimal("0.05"))
@@ -83,6 +82,28 @@ public class LoanControllerTests {
                 .header("Authorization", "Bearer " + jwtService.generateToken(new Entity())));
 
     }
+/*
+    @Test
+    @WithMockUser
+    public void createLoan_ValidRequest_ReturnsOkResponse() throws Exception {
+        // Arrange
+        Long accountId = 1L;
+        Long productId = 2L;
+        LoanRequestDto loanRequestDto = new LoanRequestDto(); // Puedes configurar este objeto según sea necesario
 
+        // Simulamos el comportamiento del servicio
+        // Puedes configurar el comportamiento esperado según tus necesidades
+        when(loanService.loanCreation(any(LoanRequestDto.class), any(Long.class), any(Long.class))).thenReturn(null);
 
+        // Act and Assert
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/loans/create/" + accountId + "/" + productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(loanRequestDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        // Verificamos que el método loanCreation del servicio haya sido llamado
+        verify(loanService, times(1)).loanCreation(any(LoanRequestDto.class), any(Long.class), any(Long.class));
+    }
+ */
 }

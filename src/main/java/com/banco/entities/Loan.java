@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "loan")
@@ -26,10 +27,6 @@ public class Loan {
     @JsonIgnore
     @OneToOne(mappedBy = "loan")
     private Contract contract;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @OneToOne
-    private Account account;
 
     @JsonProperty (access = JsonProperty.Access.READ_ONLY)
     @Column
@@ -88,6 +85,10 @@ public class Loan {
     private LoanStatus status;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @OneToOne
+    private Account account;
+
+    @JsonIgnore
     @Column
     private LoanCreationStatus creationStatus;
 
@@ -114,4 +115,8 @@ public class Loan {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
     private Integer loanNumberPayments;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @OneToMany(mappedBy = "loan")
+    private List<AmortizationPlan> amortizationPlan;
 }
