@@ -28,7 +28,7 @@ public class Account {
     private BigDecimal balance;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column
-    private BigDecimal real_balance;
+    private BigDecimal realBalance;
     @JsonIgnore
     @Column
     private Date creationDate;

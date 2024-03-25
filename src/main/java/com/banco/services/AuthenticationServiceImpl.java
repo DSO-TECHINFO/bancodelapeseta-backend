@@ -296,6 +296,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     }
 
+    @Override
+    public CurrentUserDto getCurrentUser() {
+        Entity entity = entityUtils.checkIfEntityExists(entityUtils.extractUser());
+        CurrentUserDto currentUserDto = CurrentUserDto.builder().build();
+        copyNonNullFields.copyNonNullProperties(entity,currentUserDto,false);
+        return currentUserDto;
+    }
+
     private void generateCodesAndSend(Entity entity) throws CustomException {
         // SET EMAIL AND PHONE CODES HERE AND SEND THEM
         String code = RandomStringUtils.randomNumeric(6);
