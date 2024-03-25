@@ -42,6 +42,7 @@ import java.util.List;
 public class Tpv {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -64,9 +65,10 @@ public class Tpv {
     @Column
     private Boolean activated;
 
+    // @OneToOne(cascade = CascadeType.REFRESH)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @OneToOne(cascade = CascadeType.REFRESH)
+    @OneToOne(mappedBy = "tpv")
     private Contract contract;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

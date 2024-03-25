@@ -36,9 +36,11 @@ import lombok.NoArgsConstructor;
 public class TpvTransactions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ManyToOne(cascade = CascadeType.ALL)
     private Tpv tpv;
 

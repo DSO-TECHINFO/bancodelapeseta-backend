@@ -32,7 +32,7 @@ public class TpvController {
     }
 
     @GetMapping("/return/{idTransaction}")
-    public ResponseEntity<?> returnPayment(@PathVariable Long idTransaction) throws CustomException {
+    public ResponseEntity<?> returnPayment(@PathVariable Long idTransaction) {
         tpvService.returnPayment(idTransaction);
         return ResponseEntity.ok().build();
     }
