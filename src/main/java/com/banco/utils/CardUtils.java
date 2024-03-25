@@ -27,10 +27,10 @@ public class CardUtils {
                                                                   CardNetwork.VISA, 16, 
                                                                   CardNetwork.MASTERCARD, 16);                                                            
 
-    @Value("${bank.hash.id}")
+    @Value("${bank.code}")
     private String BANK_HASH_ID;
     
-    @Value("${bank.country.code}")
+    @Value("${country.code}")
     private String BANK_COUNTRY_CODE;
 
     private static <K, V> K getKeyFromValue(Map<K, V> map, V value) {
@@ -105,6 +105,7 @@ public class CardUtils {
         StringBuilder innBuilder = new StringBuilder();
 
         innBuilder.append(MII.get(cardNetwork));
+        // 0 -> 99999
         innBuilder.append(random.nextInt((int) Math.pow(10,5)));
 
 
