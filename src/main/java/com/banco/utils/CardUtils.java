@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +29,10 @@ public class CardUtils {
                                                                   CardNetwork.MASTERCARD, 16);                                                            
 
     @Value("${bank.code}")
-    private String BANK_HASH_ID;
+    private String BANK_CODE;
     
     @Value("${country.code}")
-    private String BANK_COUNTRY_CODE;
+    private String COUNTRY_CODE;
 
     private static <K, V> K getKeyFromValue(Map<K, V> map, V value) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -47,7 +48,7 @@ public class CardUtils {
         try {
 
             // INN
-            String innString = generateINN(cardNetwork, cardType, name, account);
+            String innString = generateINN(cardNetwork, cardType, BANK_CODE, COUNTRY_CODE);
             cardNumber.append(innString);
 
             int cardLength = TOTAL_LENGTH.get(cardNetwork);
@@ -87,8 +88,6 @@ public class CardUtils {
             alternateFlag = !alternateFlag;
         }
 
-        System.out.printf("sum -> %s, number -> %s\n", sum, (sum % 10 == 0) ? 0 : 10 - sum % 10);
-
         return (sum % 10 == 0) ? 0 : 10 - sum % 10;
     }
 
@@ -103,13 +102,9 @@ public class CardUtils {
         Random random = new Random(seed);
 
         StringBuilder innBuilder = new StringBuilder();
-
         innBuilder.append(MII.get(cardNetwork));
-        // 0 -> 99999
-        innBuilder.append(random.nextInt((int) Math.pow(10,5)));
+        innBuilder.append(StringUtils.leftPad(random.nextInt((int) Math.pow(10,5)) + "", 5, '0'));
 
-
-        System.out.println(innBuilder.toString());
         return innBuilder.toString();
     }
 
@@ -121,11 +116,10 @@ public class CardUtils {
             throw new Exception("Account Number Generation failed");
         } 
         Random random = new Random(seed);
-        return random.nextInt((int) Math.pow(10,length)) + "";
+        return StringUtils.leftPad(random.nextInt((int) Math.pow(10,length)) + "", length, '0');
     }
 
     private int generateChecksum(String number) {
-        System.out.print("Number generation: ");
         return luhnAlgorithm(number+"0");
     }
 
@@ -141,7 +135,6 @@ public class CardUtils {
             if (number.length() != TOTAL_LENGTH.get(cardNetwork)) 
                 throw new Exception("Length not valid");
             
-            System.out.print("Number validation: ");
             if(luhnAlgorithm(number) != 0)
                 throw new Exception("Validation number isn't correct");
         } catch(Exception exception) {
@@ -149,6 +142,10 @@ public class CardUtils {
         }
         
         return true;
+    }
+
+    private static long generateLongFromHash(String input) throws NoSuchAlgorithmException {
+        return convertBytesToNumber(generateHash(input));
     }
 
     private static byte[] generateHash(String input) throws NoSuchAlgorithmException {
@@ -162,9 +159,5 @@ public class CardUtils {
             number += (long) (bytes[i] & 0xFF) << (8 * i);
         }
         return number;
-    }
-
-    private static long generateLongFromHash(String input) throws NoSuchAlgorithmException {
-        return convertBytesToNumber(generateHash(input));
     }
 }

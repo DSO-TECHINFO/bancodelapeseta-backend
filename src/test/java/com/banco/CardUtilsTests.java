@@ -31,13 +31,13 @@ class CardUtilsTests {
 
     @Test
     void testGenerateCardNumber() {
-        CardNetwork cardNetwork = CardNetwork.VISA;
+        CardNetwork cardNetwork = CardNetwork.MASTERCARD;
         CardType cardType = CardType.DEBIT;
 
-        String account = "ES197912001098";
-        String name = "Jesus Martinez Garcia";
+        String account = "ES-1979120030121";
+        String name = "Daniel Santa";
         int nthAccountCard = 1;
-        String expectedCardNumber = "4500 8148 8431 367";
+        String expectedCardNumber = "5674661488431365";
 
         String card = cardUtils.createCardNumber(cardNetwork, cardType, account, name, nthAccountCard);
         Assertions.assertEquals(expectedCardNumber, card);
