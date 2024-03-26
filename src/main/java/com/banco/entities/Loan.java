@@ -84,6 +84,10 @@ public class Loan {
     @Column
     private LoanStatus status;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @OneToOne
+    private Account account;
+
     @JsonIgnore
     @Column
     private LoanCreationStatus creationStatus;
