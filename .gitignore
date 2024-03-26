@@ -35,3 +35,9 @@ build/
 .vscode/
 src/main/resources/application.properties
 src/main/resources/application.properties
+
+
+src/main/java/com/banco/services/BeforeEach.java
+
+### Pa los pijos de mac
+.DS_Store

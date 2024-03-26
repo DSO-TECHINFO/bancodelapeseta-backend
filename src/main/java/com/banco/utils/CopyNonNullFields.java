@@ -18,7 +18,7 @@ public class CopyNonNullFields {
 
     }
 
-    public static String[] getNullPropertyNames(Object source, boolean nonNullPropertiesFlag) throws CustomException {
+    private static String[] getNullPropertyNames(Object source, boolean nonNullPropertiesFlag) throws CustomException {
         final BeanWrapper src = new BeanWrapperImpl(source);
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
 
