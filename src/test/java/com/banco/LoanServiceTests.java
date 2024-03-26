@@ -4,6 +4,7 @@ import com.banco.Factories.LoanFactory;
 import com.banco.dtos.LoanRequestDto;
 import com.banco.entities.*;
 import com.banco.mappers.LoanMapper;
+import com.banco.repositories.ContractRepository;
 import com.banco.repositories.EntityRepository;
 import com.banco.repositories.LoanRepository;
 import com.banco.services.AccountServiceImpl;
@@ -34,8 +35,11 @@ public class LoanServiceTests {
     @Mock
     private ProductUtils productUtils;
 
-    @MockBean
+    @Mock
     private LoanRepository loanRepository;
+
+    @Mock
+    private ContractRepository contractRepository;
 
     @Mock
     private LoanMapper loanMapper;
@@ -56,10 +60,20 @@ public class LoanServiceTests {
         account.setBalance(new BigDecimal("0.00"));
         account.setRealBalance(new BigDecimal("0.00"));
 
+        Loan loan = new LoanFactory().sampleLoan();
         Product product = new Product();
         product.setActive(true);
         product.setId(2L);
         product.setType(ProductType.LOAN);
+
+        Contract contract = Contract.builder()
+                .creationDate(new java.util.Date())
+                .product(product)
+                .account(account)
+                .deactivated(false)
+                .type(ContractType.LOAN)
+                .loan(loan)
+                .build();
 
         when(entityRepository.findByTaxId(any()))
                 .thenReturn(Optional.of(Entity.builder()
@@ -70,9 +84,10 @@ public class LoanServiceTests {
         when(loanMapper.LoanRequestDtoToLoan(loanRequestDto)).thenReturn(new LoanFactory().sampleLoan());
         when(accountService.getAccountById(any())).thenReturn(account);
         when(productUtils.checkProduct(any())).thenReturn(product);
-        doNothing().when(loanRepository.save(new LoanFactory().sampleLoan()));
+        when(loanRepository.save(loan)).thenReturn(loan);
+        when(contractRepository.save(contract)).thenReturn(contract);
         loanService.loanCreation(loanRequestDto, 19L, 2L);
-        //verify(loanRepositoryMock, times(1)).save(any(Loan.class));
-       // verify(contractRepositoryMock, times(1)).save(any(Contract.class));
+        verify(loanRepository, times(1)).save(any(Loan.class));
+        verify(contractRepository, times(1)).save(any(Contract.class));
     }
 }
