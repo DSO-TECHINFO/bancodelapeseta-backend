@@ -43,7 +43,7 @@ public class CalculateAmortizationServiceImpl implements CalculateAmortizationSe
             amortizationPlan.setInterests(interestPayment.setScale(2, RoundingMode.HALF_UP));
             amortizationPlan.setAmortCap(principalPayment.setScale(2, RoundingMode.HALF_UP));
             amortizationPlan.setPendingCapital(remainingBalance.setScale(2, RoundingMode.HALF_UP));
-            amortizationPlan.setDate(Date.valueOf(actualDate.plusMonths(i)));
+            amortizationPlan.setDate(Date.valueOf(actualDate.plusMonths(i + 1)));
             amortizationPlan.setLoan(loan);
 
 

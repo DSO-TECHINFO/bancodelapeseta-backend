@@ -2,6 +2,8 @@ package com.banco;
 
 
 
+import com.banco.Factories.LoanFactory;
+import com.banco.dtos.LoanRequestDto;
 import com.banco.entities.*;
 import com.banco.repositories.EntityRepository;
 import com.banco.repositories.LoanRepository;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -82,6 +85,19 @@ public class LoanControllerTests {
                 .header("Authorization", "Bearer " + jwtService.generateToken(new Entity())));
 
     }
+    @Test
+    @WithMockUser
+    public void createLoan_ValidRequest_ReturnsOkResponse() throws Exception {
+        Long accountId = 1L;
+        Long productId = 2L;
+        LoanRequestDto loanRequestDto = new LoanFactory().sampleDto();
 
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/loans/create/" + accountId + "/" + productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization","Bearer " + jwtService.generateToken(new Entity()))
+                        .content(TestUtils.asJsonString(loanRequestDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
+    }
 }
