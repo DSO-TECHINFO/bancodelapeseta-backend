@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-//TransferController
 @RestController
 @RequestMapping(path = "/transfers")
 @AllArgsConstructor
