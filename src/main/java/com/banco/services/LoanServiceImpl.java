@@ -86,9 +86,7 @@ public class LoanServiceImpl implements LoanService{
     }
     private void saveAmortizationPlan(Loan loan){
         List <AmortizationPlan> amortizationPlans = calculateAmortizationService.calculateAmortization(loan);
-        for (AmortizationPlan amortPlan: amortizationPlans) {
-            amortizationPlanRepository.save(amortPlan);
-        }
+        amortizationPlanRepository.saveAll(amortizationPlans);
     }
 
 

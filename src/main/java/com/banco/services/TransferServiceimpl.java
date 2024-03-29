@@ -59,7 +59,7 @@ public class TransferServiceimpl implements TransferService{
         Transfer transfer = Transfer.builder()
                 .status(TransferStatus.PENDING)
                 .fee(new BigDecimal(0))
-                .payerName(user.getName())
+                .payerName(user.getType() == EntityType.COMPANY ? user.getName() : user.getName() + user.getSurname())
                 .concept(createTransferDto.getConcept())
                 .description(createTransferDto.getDescription())
                 .destinationAccount(createTransferDto.getDestinationAccount())
