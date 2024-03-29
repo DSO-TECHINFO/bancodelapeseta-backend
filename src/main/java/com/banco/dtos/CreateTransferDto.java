@@ -20,7 +20,6 @@ public class CreateTransferDto {
 
     private String beneficiaryName;
     private String destinationAccount;
-    private String payerName;
     private String payerAccount;
     private String concept;
     private String description;
