@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Service
 public class AccountServiceImpl implements AccountService{
-    private EntityRepository entityRepository;
     private EntityUtils entityUtils;
     private ProductUtils productUtils;
     private CurrencyUtils currencyUtils;
@@ -34,9 +33,8 @@ public class AccountServiceImpl implements AccountService{
     private AccountRepository accountRepository;
     private TransferRepository transferRepository;
     private ContractRepository contractRepository;
+    private EntityRepository entityRepository;
     private AccountUtils accountUtils;
-
-
 
     @Override
     public List<EntityContract> getAccounts() throws CustomException {
